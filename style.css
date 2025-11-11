@@ -1,0 +1,31 @@
+body {
+  font-family: Arial, sans-serif;
+  background-color: #f5f5f5;
+  margin: 0;
+  padding: 20px;
+}
+.container {
+  max-width: 600px;
+  background-color: #fff;
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.15);
+  margin: auto;
+}
+h1, h2 { text-align: center; color: #333; }
+label { display: block; margin-top: 10px; font-weight: bold; }
+input[type="text"], input[type="email"] {
+  width: 100%; padding: 8px; margin-top: 5px;
+  border: 1px solid #ccc; border-radius: 6px;
+}
+button {
+  display: block; margin-top: 15px; width: 100%; padding: 10px;
+  background-color: #0078d4; color: #fff; border: none; border-radius: 6px; cursor: pointer;
+}
+button:hover { background-color: #005a9e; }
+canvas {
+  border: 1px solid #ccc; border-radius: 6px; margin-top: 10px; width: 100%;
+}
+.canvas-buttons { text-align: right; margin-top: 5px; }
+hr { margin: 25px 0; }
+#exportMessage { text-align: center; margin-top: 10px; font-weight: bold; }
