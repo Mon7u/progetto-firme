@@ -18,7 +18,7 @@
       <input type="text" id="cognome" required />
 
       <label>Email:</label>
-      <input type="email" id="email" readonly />
+      <input type="email" id="email" />
 
       <label>Firma Digitale:</label>
       <canvas id="firmaCanvas" width="400" height="150"></canvas>
@@ -32,44 +32,22 @@
     <div id="message"></div>
   </div>
 
-  <!-- Salvataggio su Firestore: firma in dataURL (niente Storage) -->
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-    import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-    import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-
-    // 🔧 INCOLLA QUI LA TUA CONFIG (stessa di index.html)
-    const firebaseConfig = {
-      apiKey: "TUO_API_KEY",
-      authDomain: "TUO_PROGETTO.firebaseapp.com",
-      projectId: "TUO_PROGETTO",
-      appId: "1:XXXX:web:YYYY"
-    };
-
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const db = getFirestore(app);
-    await signInAnonymously(auth);
-
-    // --- UI/Canvas ---
-    const form = document.getElementById("firmaForm");
+  <!-- Mini script per disegno firma + email da QR -->
+  <script>
     const canvas = document.getElementById("firmaCanvas");
     const ctx = canvas.getContext("2d");
     const clearBtn = document.getElementById("clearCanvas");
-    const messageDiv = document.getElementById("message");
-    let drawing = false;
+    const emailInput = document.getElementById("email");
 
-    // Legge parametri dal QR
+    // Precompila email se arriva dal QR
     const params = new URLSearchParams(window.location.search);
-    const token = params.get("token");
     const emailParam = params.get("email");
-    if (!token || !emailParam) {
-      alert("Link non valido. Torna alla pagina iniziale e genera un nuovo QR.");
-      window.location.href = "index.html";
-      throw new Error("Missing params");
+    if (emailParam) {
+      emailInput.value = decodeURIComponent(emailParam);
+      emailInput.readOnly = true;
     }
-    document.getElementById("email").value = decodeURIComponent(emailParam);
 
+    let drawing = false;
     function getPointerPos(e) {
       const rect = canvas.getBoundingClientRect();
       const t = e.touches?.[0];
@@ -97,33 +75,11 @@
       ctx.lineWidth = 2; ctx.lineCap = "round"; ctx.strokeStyle = "#000";
       ctx.lineTo(p.x, p.y); ctx.stroke(); ctx.beginPath(); ctx.moveTo(p.x, p.y);
     });
+
     clearBtn.addEventListener("click", () => ctx.clearRect(0, 0, canvas.width, canvas.height));
-
-    // Salvataggio su Firestore (firma come dataURL)
-    form.addEventListener("submit", async (e) => {
-      e.preventDefault();
-      const nome = document.getElementById("nome").value.trim();
-      const cognome = document.getElementById("cognome").value.trim();
-      const email = document.getElementById("email").value.trim();
-      if (!nome || !cognome) {
-        messageDiv.textContent = "Compila tutti i campi."; messageDiv.style.color = "red";
-        return;
-      }
-
-      messageDiv.textContent = "⏳ Salvataggio...";
-      messageDiv.style.color = "#333";
-
-      const firmaDataURL = canvas.toDataURL("image/png");
-
-      await addDoc(collection(db, "firme"), {
-        nome, cognome, email, token,
-        data: serverTimestamp(),
-        firmaDataURL
-      });
-
-      messageDiv.textContent = "✅ Registrazione completata!";
-      messageDiv.style.color = "green";
-    });
   </script>
+
+  <!-- Logica salvataggio e export condivisa -->
+  <script src="script.js"></script>
 </body>
 </html>
