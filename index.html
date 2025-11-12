@@ -27,51 +27,12 @@
     <hr/>
 
     <h2>Amministrazione</h2>
-    <p>Esporta il registro dal cloud (Firestore) oppure, se offline, dal localStorage del browser.</p>
+    <p>Esporta il registro dal Foglio Google (backend). Se offline o il backend non risponde, usa il backup locale.</p>
     <button id="exportPdf">Esporta PDF (nomi + firme)</button>
     <button id="exportCsv">Esporta CSV</button>
     <div id="exportMessage"></div>
   </div>
 
-  <!-- Logica base (QR + Export) -->
   <script src="script.js"></script>
-
-  <!-- Modulo Firebase: lettura dal cloud (Firestore) per export -->
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-    import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-    import { getFirestore, collection, getDocs, orderBy, query } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-
-    // 🔧 INCOLLA QUI LA TUA CONFIG (la stessa di registra.html)
-    const firebaseConfig = {
-      apiKey: "TUO_API_KEY",
-      authDomain: "TUO_PROGETTO.firebaseapp.com",
-      projectId: "TUO_PROGETTO",
-      appId: "1:XXXX:web:YYYY"
-    };
-
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const db = getFirestore(app);
-    await signInAnonymously(auth);
-
-    // Espone a script.js una funzione per leggere tutte le firme dal cloud
-    window.fetchFirmeFromCloud = async () => {
-      const qSnap = await getDocs(query(collection(db, "firme"), orderBy("data", "asc")));
-      const rows = [];
-      qSnap.forEach(doc => {
-        const d = doc.data();
-        rows.push({
-          nome: d.nome || "",
-          cognome: d.cognome || "",
-          email: d.email || "",
-          data: d.data?.toDate ? d.data.toDate().toLocaleString("it-IT") : "",
-          // in questa versione Firestore-only salviamo la firma come dataURL
-          firmaDataURL: d.firmaDataURL || ""
-        });
-      });
-      return rows;
-    };
-  </script>
 </body>
 </html>
