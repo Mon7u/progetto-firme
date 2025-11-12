@@ -25,6 +25,7 @@ button {
 button:hover { background-color: #005a9e; }
 canvas {
   border: 1px solid #ccc; border-radius: 6px; margin-top: 10px; width: 100%;
+  touch-action: none; /* migliora disegno su mobile */
 }
 .canvas-buttons { text-align: right; margin-top: 5px; }
 hr { margin: 25px 0; }
