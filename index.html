@@ -1,47 +1,50 @@
 <!DOCTYPE html>
 <html lang="it">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>QR Generator</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Registro Firma - Pannello</title>
 
-  <link rel="stylesheet" href="style.css?v=7">
+  <link rel="stylesheet" href="style.css?v=20" />
 
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode/1.5.0/qrcode.min.js"></script>
+  <!-- Librerie -->
+  <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.1/build/qrcode.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 </head>
 
 <body>
-  <div class="app-container fade-in">
-
+  <div class="page">
     <div class="app-card">
-      <h1 class="title">Generatore QR</h1>
+      <h1 class="title">Registro Firma - Pannello Docente</h1>
 
       <div class="field">
-        <label>Email Studente</label>
-        <input type="email" id="emailInput" placeholder="studente@scuola.it">
+        <label for="emailInput">Email studente</label>
+        <input
+          type="email"
+          id="emailInput"
+          placeholder="nome.cognome@scuola.it"
+        />
       </div>
 
       <button id="generaQR" class="primary-btn">Genera QR</button>
 
-      <div id="qrContainer" style="margin-top:25px;"></div>
-
-      <p id="istruzioni" style="display:none;margin-top:20px;color:#e5e7eb;font-size:14px;text-align:center;">
-        Scansiona il QR dal tuo telefono 📱
+      <div id="qrContainer" class="qr-wrapper"></div>
+      <p id="istruzioni" class="help-text" style="display: none;">
+        Scansiona il QR dal telefono dello studente.
       </p>
+      <div id="linkRegistrazione" class="link-wrapper"></div>
 
-      <div id="linkRegistrazione" style="margin-top:10px;text-align:center;"></div>
+      <hr class="divider" />
 
-      <hr style="margin:30px 0;opacity:0.2;">
-
+      <h2 class="subtitle">Esporta Registro</h2>
       <button id="exportCsv" class="primary-btn">Scarica CSV</button>
-      <button id="exportPdf" class="secondary-btn" style="margin-top:10px;">Scarica PDF</button>
+      <button id="exportPdf" class="secondary-btn">Scarica PDF</button>
       <div id="exportMessage" class="message"></div>
 
-      <button id="themeSwitcher" class="theme-btn">🎨 Cambia Tema</button>
+      <button id="themeSwitcher" class="theme-btn">☀️ Modalità chiara</button>
     </div>
-
   </div>
 
-  <script src="script.js?v=5"></script>
+  <script src="script.js?v=20"></script>
 </body>
 </html>

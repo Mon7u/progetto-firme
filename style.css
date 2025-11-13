@@ -1,179 +1,181 @@
-/* ------------------------------------------------------ */
-/*   BASE STYLE – PROFESSIONAL THEME (LIGHT & DARK)       */
-/* ------------------------------------------------------ */
-
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
-  font-family: "Inter", "Poppins", sans-serif;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
 
-/* ------- ROOT COLORS (DARK DEFAULT) ------- */
+/* Tema di base (dark) */
 :root {
   --bg: #0f172a;
-  --card-bg: rgba(255,255,255,0.07);
-  --text: #f8fafc;
-  --input-bg: rgba(255,255,255,0.12);
-  --border: rgba(255,255,255,0.18);
-  --accent: #3b82f6;
-  --accent-hover: #60a5fa;
-  --shadow: rgba(0,0,0,0.55);
+  --card-bg: #111827;
+  --text: #e5e7eb;
+  --input-bg: #1f2937;
+  --border: #374151;
+  --accent: #2563eb;
+  --accent-hover: #1d4ed8;
 }
 
-/* ------- LIGHT THEME VALUES ------- */
 .light-theme {
   --bg: #f3f4f6;
   --card-bg: #ffffff;
-  --text: #1e293b;
-  --input-bg: #f1f5f9;
+  --text: #111827;
+  --input-bg: #f9fafb;
   --border: #d1d5db;
   --accent: #2563eb;
-  --accent-hover: #1e40af;
-  --shadow: rgba(0,0,0,0.12);
+  --accent-hover: #1d4ed8;
 }
 
-/* ------- BODY ------- */
 body {
   background: var(--bg);
   color: var(--text);
+  min-height: 100vh;
   display: flex;
   justify-content: center;
-  min-height: 100vh;
-  padding: 20px;
-  transition: background 0.4s ease, color 0.3s ease;
+  padding: 24px;
+  transition: background 0.3s ease, color 0.3s ease;
 }
 
-/* ------- CARD ------- */
-.app-card, .success-card {
+.page {
   width: 100%;
-  max-width: 440px;
-  padding: 26px;
-  border-radius: 18px;
+  max-width: 460px;
+}
+
+.app-card,
+.success-card {
   background: var(--card-bg);
+  border-radius: 16px;
   border: 1px solid var(--border);
-  box-shadow: 0 18px 40px var(--shadow);
-  backdrop-filter: blur(20px);
-  animation: fadeUp 0.5s ease forwards;
+  padding: 22px 20px 24px;
+  box-shadow: 0 18px 35px rgba(0, 0, 0, 0.35);
+}
+
+.success-card {
+  text-align: center;
 }
 
 .title {
-  font-size: 26px;
+  font-size: 22px;
   font-weight: 700;
   text-align: center;
   margin-bottom: 18px;
 }
 
-/* ------- FORM FIELDS ------- */
+.subtitle {
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
 .field {
-  margin-bottom: 16px;
+  margin-bottom: 14px;
 }
 
 label {
   font-size: 14px;
   font-weight: 600;
-  margin-bottom: 6px;
+  margin-bottom: 4px;
   display: block;
 }
 
 input {
   width: 100%;
-  padding: 12px;
+  padding: 10px;
   border-radius: 10px;
   border: 1px solid var(--border);
   background: var(--input-bg);
   color: var(--text);
-  font-size: 15px;
-  transition: 0.2s;
+  font-size: 14px;
 }
 
 input:focus {
-  border-color: var(--accent);
-  box-shadow: 0 0 0 3px rgba(37,99,235,0.3);
   outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.4);
 }
 
-/* ------- CANVAS FIRMA ------- */
+.primary-btn,
+.secondary-btn,
+.theme-btn {
+  width: 100%;
+  padding: 10px;
+  border-radius: 999px;
+  border: none;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: 8px;
+}
+
+.primary-btn {
+  background: var(--accent);
+  color: white;
+}
+
+.primary-btn:hover {
+  background: var(--accent-hover);
+}
+
+.secondary-btn {
+  background: var(--input-bg);
+  color: var(--text);
+}
+
+.theme-btn {
+  background: var(--input-bg);
+  color: var(--text);
+  margin-top: 16px;
+}
+
+.divider {
+  margin: 20px 0;
+  border: none;
+  border-top: 1px solid var(--border);
+}
+
+.qr-wrapper {
+  display: flex;
+  justify-content: center;
+  margin-top: 12px;
+}
+
+.help-text {
+  font-size: 12px;
+  color: #9ca3af;
+  margin-top: 4px;
+}
+
+.link-wrapper a {
+  color: var(--accent);
+  font-size: 12px;
+  word-break: break-all;
+}
+
+.message {
+  margin-top: 10px;
+  font-size: 13px;
+}
+
 canvas {
   width: 100%;
-  border-radius: 12px;
-  border: 2px dashed var(--border);
+  border-radius: 10px;
+  border: 1px dashed var(--border);
   background: var(--input-bg);
   margin-top: 6px;
   touch-action: none;
 }
 
-canvas:active {
-  border-color: var(--accent);
-}
-
-/* ------- BUTTONS ------- */
-.primary-btn {
-  width: 100%;
-  padding: 12px;
-  border-radius: 12px;
-  background: var(--accent);
-  border: none;
-  color: white;
-  font-weight: 600;
-  font-size: 16px;
-  cursor: pointer;
-  transition: 0.2s;
-}
-
-.primary-btn:hover {
-  background: var(--accent-hover);
-  transform: translateY(-2px);
-}
-
-.secondary-btn, .theme-btn {
-  width: 100%;
-  padding: 10px;
-  border-radius: 10px;
-  background: var(--input-bg);
-  border: 1px solid var(--border);
-  color: var(--text);
-  margin-top: 10px;
-  cursor: pointer;
-  transition: 0.2s;
-}
-
-.secondary-btn:hover,
-.theme-btn:hover {
-  background: var(--accent);
-  color: white;
-}
-
-/* ------- SUCCESS SCREEN ------- */
-.success-card {
-  text-align: center;
-}
-
 .success-icon {
-  font-size: 70px;
+  font-size: 56px;
   color: #22c55e;
-  margin-bottom: 10px;
-  animation: popIn 0.5s ease forwards;
+  margin-bottom: 8px;
 }
 
 .success-title {
-  font-size: 24px;
-  font-weight: 700;
+  font-size: 20px;
+  margin-bottom: 6px;
 }
 
 .success-text {
-  margin-top: 10px;
-  font-size: 15px;
-}
-
-/* ------- ANIMAZIONI ------- */
-@keyframes fadeUp {
-  from {opacity:0; transform:translateY(30px);}
-  to {opacity:1; transform:translateY(0);}
-}
-
-@keyframes popIn {
-  0% {opacity:0; transform:scale(0.5);}
-  80% {transform:scale(1.15);}
-  100% {opacity:1; transform:scale(1);}
+  font-size: 14px;
 }

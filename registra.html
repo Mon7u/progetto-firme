@@ -1,65 +1,70 @@
 <!DOCTYPE html>
 <html lang="it">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Registrazione Firma</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Firma Presenza</title>
 
-  <link rel="stylesheet" href="style.css?v=7">
+  <link rel="stylesheet" href="style.css?v=20" />
 </head>
 
 <body>
-  <div class="app-container fade-in">
-
-    <!-- FORM CARD -->
+  <div class="page">
+    <!-- CARD FORM -->
     <div class="app-card" id="firmaCard">
-      <h1 class="title">Firma Digitale</h1>
+      <h1 class="title">Firma Presenza</h1>
 
-      <button id="themeSwitcher" class="theme-btn">🎨 Cambia Tema</button>
+      <button id="themeSwitcher" class="theme-btn">☀️ Modalità chiara</button>
 
       <form id="firmaForm">
-
         <div class="field">
-          <label>Nome</label>
-          <input type="text" id="nome" required>
+          <label for="nome">Nome</label>
+          <input type="text" id="nome" required />
         </div>
 
         <div class="field">
-          <label>Cognome</label>
-          <input type="text" id="cognome" required>
+          <label for="cognome">Cognome</label>
+          <input type="text" id="cognome" required />
         </div>
 
         <div class="field">
-          <label>Email</label>
-          <input type="email" id="email" required>
+          <label for="email">Email</label>
+          <input type="email" id="email" required />
         </div>
 
         <div class="field">
           <label>Firma</label>
-          <p class="subtext">Firma con dito (telefono) o mouse (PC)</p>
-
-          <canvas id="firmaCanvas" width="380" height="160"></canvas>
-
-          <button type="button" id="clearCanvas" class="secondary-btn">
-            Cancella Firma
+          <p class="help-text">
+            Firma con il dito (telefono) o con il mouse (PC).
+          </p>
+          <canvas id="firmaCanvas" width="380" height="150"></canvas>
+          <button
+            type="button"
+            id="clearCanvas"
+            class="secondary-btn"
+            type="button"
+          >
+            Cancella firma
           </button>
         </div>
 
-        <button type="submit" class="primary-btn">Conferma Firma</button>
+        <button type="submit" class="primary-btn">Conferma firma</button>
 
         <div id="message" class="message"></div>
       </form>
     </div>
 
-    <!-- SUCCESS SCREEN -->
-    <div class="success-card fade-in" id="successScreen" style="display:none;">
+    <!-- CARD SUCCESSO -->
+    <div class="success-card" id="successScreen" style="display: none;">
       <div class="success-icon">✔</div>
-      <h2 class="success-title">Firma Registrata!</h2>
-      <p class="success-text">La tua firma è stata salvata con successo.<br>Grazie! 🙌</p>
+      <h2 class="success-title">Firma registrata</h2>
+      <p class="success-text">
+        La tua firma è stata salvata correttamente.<br />
+        Puoi chiudere questa pagina.
+      </p>
     </div>
-
   </div>
 
-  <script src="script.js?v=5"></script>
+  <script src="script.js?v=20"></script>
 </body>
 </html>
