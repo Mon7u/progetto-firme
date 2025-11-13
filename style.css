@@ -43,4 +43,5 @@ canvas {
   border-radius: 6px;
   width: 100%;
   margin-top: 10px;
+  touch-action: none; /* per non far scorrere la pagina mentre firmi */
 }

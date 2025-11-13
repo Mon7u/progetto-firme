@@ -6,7 +6,7 @@ function getBasePath() {
   return window.location.pathname.replace(/index\.html$/, '');
 }
 
-// ================== QR GENERATION ==================
+// ================== QR GENERATION (index.html) ==================
 (function setupQR(){
   const btn = document.getElementById("generaQR");
   if (!btn) return;
@@ -34,50 +34,95 @@ function getBasePath() {
   });
 })();
 
-// ================== FIRMA (SALVATAGGIO) ==================
+// ================== FIRMA (SALVATAGGIO) - registra.html ==================
 (function setupSave(){
   const form = document.getElementById("firmaForm");
-  if (!form) return;
+  if (!form) return; // se non c'è il form siamo in index.html
 
   const canvas = document.getElementById("firmaCanvas");
   const ctx = canvas.getContext("2d");
-
-  // Disegno firma
-  let drawing = false;
-  canvas.addEventListener("mousedown", () => drawing = true);
-  canvas.addEventListener("mouseup", () => { drawing = false; ctx.beginPath(); });
-  canvas.addEventListener("mousemove", e => {
-    if (!drawing) return;
-    const rect = canvas.getBoundingClientRect();
-    ctx.lineWidth = 2;
-    ctx.lineCap = "round";
-    ctx.strokeStyle = "#000";
-    ctx.lineTo(e.clientX - rect.left, e.clientY - rect.top);
-    ctx.stroke();
-    ctx.beginPath();
-    ctx.moveTo(e.clientX - rect.left, e.clientY - rect.top);
-  });
-
-  document.getElementById("clearCanvas").onclick = () =>
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+  const emailInput = document.getElementById("email");
 
   // Precompila email dal QR
   const params = new URLSearchParams(window.location.search);
   const emailParam = params.get("email");
-  if (emailParam) document.getElementById("email").value = emailParam;
+  if (emailParam) emailInput.value = emailParam;
 
-  // Submit
+  // ===== Disegno firma: mouse + touch =====
+  let drawing = false;
+
+  function getPos(e) {
+    const rect = canvas.getBoundingClientRect();
+    if (e.touches && e.touches[0]) {
+      return {
+        x: e.touches[0].clientX - rect.left,
+        y: e.touches[0].clientY - rect.top
+      };
+    } else {
+      return {
+        x: e.clientX - rect.left,
+        y: e.clientY - rect.top
+      };
+    }
+  }
+
+  function startDraw(e) {
+    e.preventDefault();
+    drawing = true;
+    const p = getPos(e);
+    ctx.beginPath();
+    ctx.moveTo(p.x, p.y);
+  }
+
+  function moveDraw(e) {
+    if (!drawing) return;
+    e.preventDefault();
+    const p = getPos(e);
+    ctx.lineWidth = 2;
+    ctx.lineCap = "round";
+    ctx.strokeStyle = "#000";
+    ctx.lineTo(p.x, p.y);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(p.x, p.y);
+  }
+
+  function endDraw(e) {
+    if (!drawing) return;
+    e.preventDefault();
+    drawing = false;
+    ctx.beginPath();
+  }
+
+  // Mouse
+  canvas.addEventListener("mousedown", startDraw);
+  canvas.addEventListener("mousemove", moveDraw);
+  canvas.addEventListener("mouseup", endDraw);
+  canvas.addEventListener("mouseleave", endDraw);
+
+  // Touch
+  canvas.addEventListener("touchstart", startDraw, {passive:false});
+  canvas.addEventListener("touchmove",  moveDraw,  {passive:false});
+  canvas.addEventListener("touchend",   endDraw,   {passive:false});
+  canvas.addEventListener("touchcancel",endDraw,   {passive:false});
+
+  // Pulsante cancella
+  document.getElementById("clearCanvas").onclick = () =>
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  // ===== Invio dati =====
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
 
     const record = {
       nome: document.getElementById("nome").value.trim(),
       cognome: document.getElementById("cognome").value.trim(),
-      email: document.getElementById("email").value.trim().toLowerCase(),
+      email: emailInput.value.trim().toLowerCase(),
       firmaDataURL: canvas.toDataURL("image/png")
     };
 
-    document.getElementById("message").innerHTML = "⏳ Salvataggio...";
+    const msgDiv = document.getElementById("message");
+    msgDiv.innerHTML = "⏳ Salvataggio...";
 
     // Salva sul server PythonAnywhere
     let remoto = false;
@@ -89,21 +134,26 @@ function getBasePath() {
       });
       const j = await r.json();
       remoto = j.ok === true;
-    } catch {}
+    } catch (err) {
+      console.warn("Errore salvataggio remoto:", err);
+    }
 
-    document.getElementById("message").innerHTML =
-      remoto ? "✅ Registrazione salvata (server + locale)" :
-               "⚠️ Salvato solo in locale";
-
-    // backup
+    // Backup locale
     const key = "registroFirme";
     const arr = JSON.parse(localStorage.getItem(key) || "[]");
     arr.push({...record, data: new Date().toLocaleString("it-IT") });
     localStorage.setItem(key, JSON.stringify(arr));
+
+    msgDiv.innerHTML = remoto
+      ? "✅ Registrazione salvata (server + locale)"
+      : "⚠️ Salvato solo in locale";
+
+    form.reset();
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
   });
 })();
 
-// ================== EXPORT ==================
+// ================== EXPORT (index.html) ==================
 (async function setupExport(){
   const csvBtn = document.getElementById("exportCsv");
   const pdfBtn = document.getElementById("exportPdf");
@@ -114,7 +164,8 @@ function getBasePath() {
       const r = await fetch(`${API_BASE_URL}/firme`);
       const j = await r.json();
       return j.ok ? j.rows : null;
-    } catch {
+    } catch (err) {
+      console.warn("Errore lettura backend:", err);
       return null;
     }
   }
@@ -122,13 +173,14 @@ function getBasePath() {
   async function getArchivio() {
     const online = await getFirmeOnline();
     if (online) return online;
-
     return JSON.parse(localStorage.getItem("registroFirme") || "[]");
   }
 
+  // ---- CSV ----
   csvBtn.onclick = async () => {
     const arr = await getArchivio();
-    if (!arr.length) return;
+    const msg = document.getElementById("exportMessage");
+    if (!arr.length) { msg.textContent = "Registro vuoto"; return; }
 
     const rows = [["nome","cognome","email","data","firmaDataURL"]];
     arr.forEach(r => rows.push([
@@ -142,24 +194,33 @@ function getBasePath() {
     a.href = url;
     a.download = "registro_firme.csv";
     a.click();
+    URL.revokeObjectURL(url);
+    msg.textContent = "CSV scaricato";
   };
 
+  // ---- PDF ----
   pdfBtn.onclick = async () => {
     const arr = await getArchivio();
+    const msg = document.getElementById("exportMessage");
+    if (!arr.length) { msg.textContent = "Registro vuoto"; return; }
+
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF();
-
     let y = 20;
+
     arr.forEach(r => {
       doc.text(`Nome: ${r.nome}`, 10, y);
       doc.text(`Cognome: ${r.cognome}`, 10, y+10);
       doc.text(`Email: ${r.email}`, 10, y+20);
       doc.text(`Data: ${r.data || ""}`, 10, y+30);
-      if (r.firmaDataURL) doc.addImage(r.firmaDataURL, "PNG", 10, y+40, 120, 40);
+      if (r.firmaDataURL) {
+        try { doc.addImage(r.firmaDataURL, "PNG", 10, y+40, 120, 40); } catch(e) {}
+      }
       y += 90;
       if (y > 270) { doc.addPage(); y = 20; }
     });
 
     doc.save("registro_firme.pdf");
+    msg.textContent = "PDF scaricato";
   };
 })();
