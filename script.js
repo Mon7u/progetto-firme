@@ -1,187 +1,165 @@
-// ================== CONFIG BACKEND (Apps Script) ==================
-const WEB_APP_URL = 'https://script.google.com/a/macros/studenti.ittsrimini.edu.it/s/AKfycbyPVgH-gPEUqZ-m0qyuZEVSFnIn8rqvRStVd874s1l1KUAEAfQVYe72KdHdLunZPcSxGQ/exec';
+// ================== CONFIG BACKEND ==================
+const API_BASE_URL = 'https://Mon7u.pythonanywhere.com/api';
 
-// ================== UTILI COMUNI ==================
+// ================== FUNZIONI UTILI ==================
 function getBasePath() {
-  // Mantiene l’eventuale sottocartella (es. GitHub Pages /repo/)
   return window.location.pathname.replace(/index\.html$/, '');
 }
 
-// ================== GENERAZIONE QR (index.html) ==================
+// ================== QR GENERATION ==================
 (function setupQR(){
   const btn = document.getElementById("generaQR");
-  if (!btn) return; // non siamo in index.html
+  if (!btn) return;
 
-  function generaTokenUnivoco() {
-    const rand = Math.random().toString(36).substring(2, 10);
-    const timestamp = Date.now().toString(36);
-    return `${rand}-${timestamp}`;
-  }
-  function generaQrDaUrl(url) {
+  function generaQr(url) {
     const qrContainer = document.getElementById("qrContainer");
     qrContainer.innerHTML = "";
     const canvas = document.createElement("canvas");
-    QRCode.toCanvas(canvas, url, { width: 220, margin: 2 }, (err) => { if (err) console.error(err); });
+    QRCode.toCanvas(canvas, url, { width: 220, margin: 2 });
     qrContainer.appendChild(canvas);
 
-    const linkDiv = document.getElementById("linkRegistrazione");
-    linkDiv.innerHTML = `<a href="${url}" target="_blank">${url}</a>`;
     document.getElementById("istruzioni").style.display = "block";
+    document.getElementById("linkRegistrazione").innerHTML =
+      `<a href="${url}" target="_blank">${url}</a>`;
   }
 
   btn.addEventListener("click", () => {
     const email = document.getElementById("emailInput").value.trim().toLowerCase();
-    if (!email.includes('@')) {
-      alert("Inserisci una email valida.");
-      return;
-    }
-    const token = generaTokenUnivoco();
+    if (!email.includes("@")) { alert("Inserisci una email valida"); return; }
+
     const basePath = getBasePath();
-    const url = `${window.location.origin}${basePath}registra.html?email=${encodeURIComponent(email)}&token=${encodeURIComponent(token)}`;
-    generaQrDaUrl(url);
+    const url = `${window.location.origin}${basePath}registra.html?email=${encodeURIComponent(email)}`;
+
+    generaQr(url);
   });
 })();
 
-// ================== SALVATAGGIO FIRMA (registra.html) ==================
+// ================== FIRMA (SALVATAGGIO) ==================
 (function setupSave(){
   const form = document.getElementById("firmaForm");
-  if (!form) return; // non siamo in registra.html
+  if (!form) return;
 
-  const emailInput = document.getElementById("email");
-  const nomeInput = document.getElementById("nome");
-  const cognomeInput = document.getElementById("cognome");
   const canvas = document.getElementById("firmaCanvas");
-  const messageDiv = document.getElementById("message");
+  const ctx = canvas.getContext("2d");
 
-  form.addEventListener("submit", async (e) => {
-    e.preventDefault();
-    const nome = (nomeInput.value || "").trim();
-    const cognome = (cognomeInput.value || "").trim();
-    const email = (emailInput.value || "").trim().toLowerCase();
-    if (!nome || !cognome || !email) {
-      messageDiv.textContent = "Compila tutti i campi."; messageDiv.style.color = "red";
-      return;
-    }
-
-    messageDiv.textContent = "⏳ Salvataggio...";
-    messageDiv.style.color = "#333";
-
-    const firmaDataURL = canvas.toDataURL("image/png");
-    const dataStr = new Date().toLocaleString("it-IT");
-
-    // 1) Prova salvataggio remoto (Apps Script) — niente header per evitare preflight
-    let remotoOk = false;
-    try {
-      const res = await fetch(WEB_APP_URL, {
-        method: 'POST',
-        body: JSON.stringify({ nome, cognome, email, firmaDataURL })
-      });
-      const out = await res.json().catch(()=>({}));
-      remotoOk = out && out.ok === true;
-    } catch (e) {
-      console.warn("Salvataggio remoto fallito:", e);
-    }
-
-    // 2) Salva SEMPRE anche in locale (backup + export offline)
-    salvaInLocalStorage({ nome, cognome, email, data: dataStr, firmaDataURL });
-
-    messageDiv.textContent = remotoOk
-      ? "✅ Registrazione completata! (Foglio Google + locale)"
-      : "✅ Registrazione salvata in locale. (Backend non raggiungibile)";
-
-    messageDiv.style.color = "green";
-    form.reset();
-    const ctx = canvas.getContext("2d");
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+  // Disegno firma
+  let drawing = false;
+  canvas.addEventListener("mousedown", () => drawing = true);
+  canvas.addEventListener("mouseup", () => { drawing = false; ctx.beginPath(); });
+  canvas.addEventListener("mousemove", e => {
+    if (!drawing) return;
+    const rect = canvas.getBoundingClientRect();
+    ctx.lineWidth = 2;
+    ctx.lineCap = "round";
+    ctx.strokeStyle = "#000";
+    ctx.lineTo(e.clientX - rect.left, e.clientY - rect.top);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(e.clientX - rect.left, e.clientY - rect.top);
   });
 
-  function salvaInLocalStorage(record) {
+  document.getElementById("clearCanvas").onclick = () =>
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  // Precompila email dal QR
+  const params = new URLSearchParams(window.location.search);
+  const emailParam = params.get("email");
+  if (emailParam) document.getElementById("email").value = emailParam;
+
+  // Submit
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    const record = {
+      nome: document.getElementById("nome").value.trim(),
+      cognome: document.getElementById("cognome").value.trim(),
+      email: document.getElementById("email").value.trim().toLowerCase(),
+      firmaDataURL: canvas.toDataURL("image/png")
+    };
+
+    document.getElementById("message").innerHTML = "⏳ Salvataggio...";
+
+    // Salva sul server PythonAnywhere
+    let remoto = false;
+    try {
+      const r = await fetch(`${API_BASE_URL}/firma`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(record)
+      });
+      const j = await r.json();
+      remoto = j.ok === true;
+    } catch {}
+
+    document.getElementById("message").innerHTML =
+      remoto ? "✅ Registrazione salvata (server + locale)" :
+               "⚠️ Salvato solo in locale";
+
+    // backup
     const key = "registroFirme";
     const arr = JSON.parse(localStorage.getItem(key) || "[]");
-    arr.push(record);
+    arr.push({...record, data: new Date().toLocaleString("it-IT") });
     localStorage.setItem(key, JSON.stringify(arr));
-  }
+  });
 })();
 
-// ================== EXPORT (index.html) ==================
+// ================== EXPORT ==================
 (async function setupExport(){
   const csvBtn = document.getElementById("exportCsv");
   const pdfBtn = document.getElementById("exportPdf");
-  if (!csvBtn && !pdfBtn) return; // non siamo in index.html
+  if (!csvBtn && !pdfBtn) return;
 
-  async function fetchFromBackend() {
+  async function getFirmeOnline() {
     try {
-      const res = await fetch(`${WEB_APP_URL}?action=list`, { method: 'GET' });
-      const out = await res.json();
-      if (out && out.ok && Array.isArray(out.rows)) {
-        // Normalizza ai campi usati nel sito
-        return out.rows.map(r => ({
-          nome: r.nome || '',
-          cognome: r.cognome || '',
-          email: r.email || '',
-          data: r.timestamp || '',
-          firmaDataURL: r.firmaDataURL || ''
-        }));
-      }
-    } catch (e) {
-      console.warn("Lettura backend fallita:", e);
+      const r = await fetch(`${API_BASE_URL}/firme`);
+      const j = await r.json();
+      return j.ok ? j.rows : null;
+    } catch {
+      return null;
     }
-    return null;
   }
 
   async function getArchivio() {
-    const cloud = await fetchFromBackend();
-    if (cloud && cloud.length) return cloud;
-    // fallback locale
+    const online = await getFirmeOnline();
+    if (online) return online;
+
     return JSON.parse(localStorage.getItem("registroFirme") || "[]");
   }
 
-  csvBtn?.addEventListener("click", async () => {
-    const archivio = await getArchivio();
-    const msg = document.getElementById("exportMessage");
-    if (!archivio.length) { msg.textContent = "Registro vuoto."; return; }
+  csvBtn.onclick = async () => {
+    const arr = await getArchivio();
+    if (!arr.length) return;
 
     const rows = [["nome","cognome","email","data","firmaDataURL"]];
-    archivio.forEach(r => rows.push([r.nome, r.cognome, r.email, r.data, r.firmaDataURL || ""]));
+    arr.forEach(r => rows.push([
+      r.nome, r.cognome, r.email, r.data || "", r.firmaDataURL || ""
+    ]));
 
-    const csv = rows.map(r => r.map(cell => `"${(cell ?? '').toString().replace(/"/g,'""')}"`).join(",")).join("\n");
-    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    const csv = rows.map(r => r.join(",")).join("\n");
+    const blob = new Blob([csv], {type:"text/csv"});
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
-    a.href = url; a.download = `registro_firme.csv`; a.click();
-    URL.revokeObjectURL(url);
-    msg.textContent = "CSV scaricato.";
-  });
+    a.href = url;
+    a.download = "registro_firme.csv";
+    a.click();
+  };
 
-  pdfBtn?.addEventListener("click", async () => {
+  pdfBtn.onclick = async () => {
+    const arr = await getArchivio();
     const { jsPDF } = window.jspdf;
-    const archivio = await getArchivio();
-    const msg = document.getElementById("exportMessage");
-    if (!archivio.length) { msg.textContent = "Registro vuoto."; return; }
+    const doc = new jsPDF();
 
-    const doc = new jsPDF({ unit: "pt", format: "a4" });
-    const margin = 40, lh = 18; let y = margin;
-
-    for (const r of archivio) {
-      if (y > 750) { doc.addPage(); y = margin; }
-      doc.setFontSize(12);
-      doc.text(`Nome: ${r.nome}`, margin, y);
-      doc.text(`Cognome: ${r.cognome}`, margin + 250, y);
-      y += lh;
-      doc.text(`Email: ${r.email}`, margin, y);
-      doc.text(`Data: ${r.data}`, margin + 250, y);
-      y += lh;
-
-      const dataUrl = r.firmaDataURL || "";
-      if (dataUrl) {
-        try { doc.addImage(dataUrl, 'PNG', margin, y, 220, 70); }
-        catch (e) { console.warn("Firma non inserita:", e); }
-      }
+    let y = 20;
+    arr.forEach(r => {
+      doc.text(`Nome: ${r.nome}`, 10, y);
+      doc.text(`Cognome: ${r.cognome}`, 10, y+10);
+      doc.text(`Email: ${r.email}`, 10, y+20);
+      doc.text(`Data: ${r.data || ""}`, 10, y+30);
+      if (r.firmaDataURL) doc.addImage(r.firmaDataURL, "PNG", 10, y+40, 120, 40);
       y += 90;
-      doc.setDrawColor(200);
-      doc.line(margin, y - 20, 555, y - 20);
-    }
+      if (y > 270) { doc.addPage(); y = 20; }
+    });
+
     doc.save("registro_firme.pdf");
-    msg.textContent = "PDF generato e scaricato.";
-  });
+  };
 })();

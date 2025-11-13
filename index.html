@@ -1,35 +1,36 @@
 <!DOCTYPE html>
 <html lang="it">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Accesso Registro Firma Digitale</title>
-  <link rel="stylesheet" href="style.css"/>
-  <!-- Librerie per QR e PDF -->
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Registro Firma Digitale</title>
+  <link rel="stylesheet" href="style.css">
+
+  <!-- Librerie -->
   <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.1/build/qrcode.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 </head>
+
 <body>
   <div class="container">
-    <h1>Accesso Registro Firma Digitale</h1>
+    <h1>Registro Firma Digitale</h1>
 
-    <label for="emailInput">Email istituzionale:</label>
-    <input type="email" id="emailInput" placeholder="nome.cognome@ittsrimini.edu.it" required />
+    <label>Email istituzionale:</label>
+    <input type="email" id="emailInput" placeholder="nome.cognome@scuola.it">
 
     <button id="generaQR">Genera QR Code</button>
 
     <div id="qrContainer" style="text-align:center; margin-top:20px;"></div>
     <p id="istruzioni" style="display:none; text-align:center;">
-      Scansiona il QR con il telefono o usa il link qui sotto.
+      Scansiona il QR con il telefono oppure usa il link sotto.
     </p>
     <div id="linkRegistrazione" style="text-align:center; margin-top:10px;"></div>
 
-    <hr/>
+    <hr>
 
-    <h2>Amministrazione</h2>
-    <p>Esporta il registro dal Foglio Google (backend). Se offline o il backend non risponde, usa il backup locale.</p>
-    <button id="exportPdf">Esporta PDF (nomi + firme)</button>
+    <h2>Esporta Registro</h2>
     <button id="exportCsv">Esporta CSV</button>
+    <button id="exportPdf">Esporta PDF</button>
     <div id="exportMessage"></div>
   </div>
 

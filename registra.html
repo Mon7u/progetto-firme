@@ -1,30 +1,29 @@
 <!DOCTYPE html>
 <html lang="it">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Registro Firma Digitale - Registrazione</title>
-  <link rel="stylesheet" href="style.css"/>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Registra Firma</title>
+  <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
   <div class="container">
-    <h1>Modulo di Registrazione Firma</h1>
+    <h1>Registrazione Firma</h1>
 
     <form id="firmaForm">
       <label>Nome:</label>
-      <input type="text" id="nome" required />
+      <input type="text" id="nome" required>
 
       <label>Cognome:</label>
-      <input type="text" id="cognome" required />
+      <input type="text" id="cognome" required>
 
       <label>Email:</label>
-      <input type="email" id="email" />
+      <input type="email" id="email" required>
 
       <label>Firma Digitale:</label>
       <canvas id="firmaCanvas" width="400" height="150"></canvas>
-      <div class="canvas-buttons">
-        <button type="button" id="clearCanvas">Cancella</button>
-      </div>
+      <button type="button" id="clearCanvas">Cancella</button>
 
       <button type="submit">Salva nel Registro</button>
     </form>
@@ -32,54 +31,6 @@
     <div id="message"></div>
   </div>
 
-  <!-- Mini script per disegno firma + email da QR -->
-  <script>
-    const canvas = document.getElementById("firmaCanvas");
-    const ctx = canvas.getContext("2d");
-    const clearBtn = document.getElementById("clearCanvas");
-    const emailInput = document.getElementById("email");
-
-    // Precompila email se arriva dal QR
-    const params = new URLSearchParams(window.location.search);
-    const emailParam = params.get("email");
-    if (emailParam) {
-      emailInput.value = decodeURIComponent(emailParam);
-      emailInput.readOnly = true;
-    }
-
-    let drawing = false;
-    function getPointerPos(e) {
-      const rect = canvas.getBoundingClientRect();
-      const t = e.touches?.[0];
-      return t
-        ? { x: t.clientX - rect.left, y: t.clientY - rect.top }
-        : { x: e.clientX - rect.left, y: e.clientY - rect.top };
-    }
-    // mouse
-    canvas.addEventListener("mousedown", () => (drawing = true));
-    canvas.addEventListener("mouseup", () => { drawing = false; ctx.beginPath(); });
-    canvas.addEventListener("mouseleave", () => { drawing = false; ctx.beginPath(); });
-    canvas.addEventListener("mousemove", (e) => {
-      if (!drawing) return;
-      const p = getPointerPos(e);
-      ctx.lineWidth = 2; ctx.lineCap = "round"; ctx.strokeStyle = "#000";
-      ctx.lineTo(p.x, p.y); ctx.stroke(); ctx.beginPath(); ctx.moveTo(p.x, p.y);
-    });
-    // touch
-    canvas.addEventListener("touchstart", (e) => { e.preventDefault(); drawing = true; });
-    canvas.addEventListener("touchend", () => { drawing = false; ctx.beginPath(); });
-    canvas.addEventListener("touchmove", (e) => {
-      e.preventDefault();
-      if (!drawing) return;
-      const p = getPointerPos(e);
-      ctx.lineWidth = 2; ctx.lineCap = "round"; ctx.strokeStyle = "#000";
-      ctx.lineTo(p.x, p.y); ctx.stroke(); ctx.beginPath(); ctx.moveTo(p.x, p.y);
-    });
-
-    clearBtn.addEventListener("click", () => ctx.clearRect(0, 0, canvas.width, canvas.height));
-  </script>
-
-  <!-- Logica salvataggio e export condivisa -->
   <script src="script.js"></script>
 </body>
 </html>
