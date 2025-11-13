@@ -1,176 +1,171 @@
-/* ===== RESET BASE ===== */
+/* ===== RESET ===== */
 * {
-  box-sizing: border-box;
   margin: 0;
   padding: 0;
+  box-sizing: border-box;
 }
 
-/* ===== LAYOUT GENERALE ===== */
+/* ===== LAYOUT ===== */
 body {
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   background: linear-gradient(135deg, #0f172a, #1e293b);
-  color: #0f172a;
+  font-family: "Poppins", system-ui, sans-serif;
+  color: #ffffff;
   min-height: 100vh;
-  padding: 20px;
   display: flex;
-  align-items: flex-start;
   justify-content: center;
+  padding: 20px;
 }
 
-.container {
+/* ===== CONTAINER ===== */
+.app-container {
   width: 100%;
-  max-width: 640px;
+  max-width: 420px;
 }
 
-/* ===== TITOLI ===== */
-h1 {
-  color: #e5e7eb;
-  text-align: center;
-  margin-bottom: 16px;
-}
-
-h2 {
-  color: #16a34a;
-  margin-bottom: 8px;
-}
-
-/* ===== CARD GENERICA ===== */
-.card {
+/* ===== CARD ===== */
+.app-card {
   background: #ffffff;
-  border-radius: 14px;
-  padding: 18px 20px 20px;
-  box-shadow: 0 18px 40px rgba(15, 23, 42, 0.35);
-  border: 1px solid #e5e7eb;
+  border-radius: 20px;
+  padding: 24px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.35);
+  animation: slideUp 0.6s ease forwards;
+  color: #111827;
 }
 
-/* ===== CAMPI FORM ===== */
+.title {
+  text-align: center;
+  font-size: 26px;
+  font-weight: 700;
+  margin-bottom: 18px;
+}
+
+/* ===== CAMPI ===== */
 .field {
-  margin-bottom: 14px;
+  margin-bottom: 18px;
 }
 
 label {
   display: block;
   font-size: 14px;
+  margin-bottom: 6px;
   font-weight: 600;
-  margin-bottom: 4px;
-  color: #111827;
 }
 
-input[type="text"],
-input[type="email"] {
+input {
   width: 100%;
-  padding: 9px 10px;
-  border-radius: 8px;
+  padding: 12px;
+  border-radius: 12px;
   border: 1px solid #d1d5db;
   font-size: 14px;
-  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  transition: 0.2s;
+  background: #f9fafb;
 }
 
-input[type="text"]:focus,
-input[type="email"]:focus {
-  outline: none;
+input:focus {
   border-color: #2563eb;
-  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.25);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.25);
+  outline: none;
+}
+
+.subtext {
+  font-size: 12px;
+  color: #6b7280;
+  margin-bottom: 6px;
 }
 
 /* ===== PULSANTI ===== */
-button {
-  font-size: 14px;
-  border-radius: 999px;
-  padding: 9px 14px;
-  border: none;
-  cursor: pointer;
-  transition: transform 0.1s ease, box-shadow 0.1s ease, background-color 0.15s ease;
-}
-
-button:disabled {
-  opacity: 0.7;
-  cursor: default;
-  box-shadow: none;
-  transform: none;
-}
-
 .primary-btn {
   width: 100%;
+  padding: 12px;
+  border-radius: 14px;
   background: linear-gradient(135deg, #2563eb, #1d4ed8);
-  color: #ffffff;
+  color: white;
+  font-size: 15px;
   font-weight: 600;
-  margin-top: 6px;
-  box-shadow: 0 10px 24px rgba(37, 99, 235, 0.45);
+  border: none;
+  cursor: pointer;
+  margin-top: 8px;
+  transition: 0.15s;
+  box-shadow: 0 10px 20px rgba(37, 99, 235, 0.40);
 }
 
-.primary-btn:hover:not(:disabled) {
-  background: linear-gradient(135deg, #1d4ed8, #1e40af);
-  transform: translateY(-1px);
-  box-shadow: 0 14px 30px rgba(37, 99, 235, 0.55);
+.primary-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 14px 26px rgba(37, 99, 235, 0.50);
 }
 
 .secondary-btn {
   margin-top: 8px;
-  background: #f3f4f6;
-  color: #374151;
-  border-radius: 999px;
-  padding-inline: 16px;
+  padding: 8px 12px;
+  background: #e5e7eb;
+  border-radius: 12px;
+  border: none;
+  cursor: pointer;
+  font-size: 13px;
 }
 
 .secondary-btn:hover {
-  background: #e5e7eb;
-  transform: translateY(-1px);
+  background: #d1d5db;
 }
 
-/* ===== CANVAS FIRMA ===== */
+/* ===== CANVAS ===== */
 canvas {
-  border: 1px dashed #9ca3af;
-  border-radius: 10px;
   width: 100%;
-  max-width: 100%;
-  background: #f9fafb;
+  border: 2px dashed #9ca3af;
+  background: #f8fafc;
+  border-radius: 14px;
   margin-top: 6px;
-  touch-action: none; /* fondamentale per il touch */
+  touch-action: none;
 }
 
-/* ===== TESTI VARI ===== */
-.hint {
-  font-size: 12px;
-  color: #6b7280;
-  margin-bottom: 4px;
-}
-
-/* ===== MESSAGGI ===== */
+/* ===== MESSAGGIO ===== */
 .message {
   margin-top: 10px;
   font-size: 13px;
-  min-height: 18px;
-  color: #111827;
+  color: #374151;
 }
 
 /* ===== SCHERMATA SUCCESSO ===== */
-.success-screen {
+.success-card {
+  background: #ffffff;
+  padding: 30px 24px;
+  border-radius: 20px;
+  color: #111827;
   text-align: center;
-  margin-top: 12px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.35);
+  margin-top: 20px;
 }
 
-.success-screen p {
-  margin-top: 6px;
+.success-icon {
+  font-size: 60px;
+  color: #16a34a;
+  font-weight: bold;
 }
 
-/* ===== INDEX.HTML SPECIFICO ===== */
-#qrContainer {
-  margin-top: 16px;
-}
-
-#linkRegistrazione a {
-  color: #60a5fa;
-  word-break: break-all;
-  font-size: 13px;
-}
-
-#linkRegistrazione a:hover {
-  text-decoration: underline;
-}
-
-#exportMessage {
+.success-title {
+  font-size: 24px;
   margin-top: 10px;
-  font-size: 13px;
-  text-align: center;
+  font-weight: 700;
+}
+
+.success-text {
+  margin-top: 10px;
+  font-size: 14px;
+  color: #374151;
+  line-height: 1.5;
+}
+
+/* ===== ANIMAZIONI ===== */
+.fade-in {
+  opacity: 0;
+  animation: fadeIn 0.6s ease forwards;
+}
+
+@keyframes fadeIn {
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { transform: translateY(40px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
 }
