@@ -1,28 +1,14 @@
 // ===== CONFIG =====
 const API_BASE_URL = "https://Mon7u.pythonanywhere.com/api";
 
-// ⚠️ CAMBIA QUI con il tuo vero URL GitHub Pages (senza / finale)
-const GH_BASE_URL = "https://YOUR_GH_USER.github.io/YOUR_REPO";
+// ===== TEMA LIGHT/DARK (solo se c'è il toggle, quindi solo index) =====
+(function setupThemeToggle() {
+  const toggle = document.getElementById("themeToggle");
+  if (!toggle) return; // in registra.html non c'è, quindi non fa niente
 
-// ===== TEMA LIGHT/DARK =====
-(function setupTheme() {
-  const btn = document.getElementById("themeSwitcher");
-  if (!btn) return;
-
-  const updateLabel = () => {
-    if (document.body.classList.contains("light-theme")) {
-      btn.textContent = "🌙 Modalità scura";
-    } else {
-      btn.textContent = "☀️ Modalità chiara";
-    }
-  };
-
-  btn.addEventListener("click", () => {
+  toggle.addEventListener("click", () => {
     document.body.classList.toggle("light-theme");
-    updateLabel();
   });
-
-  updateLabel();
 })();
 
 // ===== GENERA QR (index.html) =====
@@ -39,26 +25,24 @@ const GH_BASE_URL = "https://YOUR_GH_USER.github.io/YOUR_REPO";
       return;
     }
 
-    const url = `${GH_BASE_URL}/registra.html?email=${encodeURIComponent(
-      email
-    )}`;
+    // URL relativo: stessa cartella di index.html (funziona ovunque)
+    const url = new URL("registra.html", window.location.href);
+    url.searchParams.set("email", email);
 
     const qrContainer = document.getElementById("qrContainer");
     qrContainer.innerHTML = "";
 
-    const canvas = document.createElement("canvas");
-    QRCode.toCanvas(canvas, url, { width: 220, margin: 2 }, (err) => {
+    QRCode.toCanvas(url.toString(), { width: 220, margin: 2 }, (err, canvas) => {
       if (err) {
         alert("Errore nella generazione del QR");
         return;
       }
+      qrContainer.appendChild(canvas);
     });
-    qrContainer.appendChild(canvas);
 
     document.getElementById("istruzioni").style.display = "block";
-    document.getElementById(
-      "linkRegistrazione"
-    ).innerHTML = `<a href="${url}" target="_blank">${url}</a>`;
+    document.getElementById("linkRegistrazione").innerHTML =
+      `<a href="${url.toString()}" target="_blank">${url.toString()}</a>`;
   });
 })();
 
@@ -115,11 +99,9 @@ const GH_BASE_URL = "https://YOUR_GH_USER.github.io/YOUR_REPO";
     drawing = false;
   });
 
-  document
-    .getElementById("clearCanvas")
-    .addEventListener("click", () =>
-      ctx.clearRect(0, 0, canvas.width, canvas.height)
-    );
+  document.getElementById("clearCanvas").addEventListener("click", () =>
+    ctx.clearRect(0, 0, canvas.width, canvas.height)
+  );
 
   let alreadySubmitted = false;
 
@@ -147,7 +129,6 @@ const GH_BASE_URL = "https://YOUR_GH_USER.github.io/YOUR_REPO";
     };
 
     // Salva su PythonAnywhere
-    let okRemoto = false;
     try {
       const res = await fetch(`${API_BASE_URL}/firma`, {
         method: "POST",
@@ -155,7 +136,7 @@ const GH_BASE_URL = "https://YOUR_GH_USER.github.io/YOUR_REPO";
         body: JSON.stringify(record),
       });
       const j = await res.json();
-      okRemoto = j.ok === true;
+      // se vuoi puoi controllare j.ok
     } catch (err) {
       console.warn("Errore backend:", err);
     }
