@@ -9,7 +9,7 @@ function getBasePath() {
 // ================== QR GENERATION (index.html) ==================
 (function setupQR(){
   const btn = document.getElementById("generaQR");
-  if (!btn) return;
+  if (!btn) return; // non siamo in index.html
 
   function generaQr(url) {
     const qrContainer = document.getElementById("qrContainer");
@@ -25,7 +25,10 @@ function getBasePath() {
 
   btn.addEventListener("click", () => {
     const email = document.getElementById("emailInput").value.trim().toLowerCase();
-    if (!email.includes("@")) { alert("Inserisci una email valida"); return; }
+    if (!email.includes("@")) {
+      alert("Inserisci una email valida");
+      return;
+    }
 
     const basePath = getBasePath();
     const url = `${window.location.origin}${basePath}registra.html?email=${encodeURIComponent(email)}`;
@@ -37,19 +40,20 @@ function getBasePath() {
 // ================== FIRMA (mouse + touch) - registra.html ==================
 (function setupSave(){
   const form = document.getElementById("firmaForm");
-  if (!form) return; // siamo in index.html
+  if (!form) return; // non siamo in registra.html
 
   const canvas = document.getElementById("firmaCanvas");
   const ctx = canvas.getContext("2d");
   const emailInput = document.getElementById("email");
   const msgDiv = document.getElementById("message");
+  const successDiv = document.getElementById("successScreen");
 
   // Precompila email dal QR
   const params = new URLSearchParams(window.location.search);
   const emailParam = params.get("email");
   if (emailParam) emailInput.value = emailParam;
 
-  // ==== disegno con Pointer Events (valido per mouse + touch) ====
+  // ==== Disegno con Pointer Events (mouse + touch) ====
   let drawing = false;
 
   function getPos(e) {
@@ -95,12 +99,31 @@ function getBasePath() {
   canvas.addEventListener("pointercancel", endDraw);
 
   // Pulsante cancella
-  document.getElementById("clearCanvas").onclick = () =>
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+  const clearBtn = document.getElementById("clearCanvas");
+  if (clearBtn) {
+    clearBtn.onclick = () => ctx.clearRect(0, 0, canvas.width, canvas.height);
+  }
+
+  // ---- evita spam multiplo ----
+  let alreadySubmitted = false;
 
   // ==== Invio dati ====
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
+    if (alreadySubmitted) return; // blocca doppio click
+
+    // controlla che la firma non sia vuota (canvas bianco)
+    const blank = document.createElement("canvas");
+    blank.width = canvas.width;
+    blank.height = canvas.height;
+    if (canvas.toDataURL() === blank.toDataURL()) {
+      msgDiv.textContent = "Metti la firma prima di inviare.";
+      return;
+    }
+
+    alreadySubmitted = true;
+    const submitBtn = form.querySelector('button[type="submit"]');
+    if (submitBtn) submitBtn.disabled = true;
 
     const record = {
       nome: document.getElementById("nome").value.trim(),
@@ -131,20 +154,18 @@ function getBasePath() {
     arr.push({...record, data: new Date().toLocaleString("it-IT") });
     localStorage.setItem(key, JSON.stringify(arr));
 
-    msgDiv.textContent = remoto
-      ? "✅ Registrazione salvata (server + locale)"
-      : "⚠️ Salvato solo in locale";
-
-    form.reset();
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    // Nascondi form e messaggio, mostra schermata finale
+    form.style.display = "none";
+    msgDiv.style.display = "none";
+    if (successDiv) successDiv.style.display = "block";
   });
 })();
 
 // ================== EXPORT (index.html) ==================
-(async function setupExport(){
+(function setupExport(){
   const csvBtn = document.getElementById("exportCsv");
   const pdfBtn = document.getElementById("exportPdf");
-  if (!csvBtn && !pdfBtn) return;
+  if (!csvBtn && !pdfBtn) return; // non siamo in index.html
 
   // leggi dal server e normalizza i campi
   async function getFirmeOnline() {
@@ -153,6 +174,7 @@ function getBasePath() {
       const j = await r.json();
       if (!j.ok || !Array.isArray(j.rows)) return null;
 
+      // timestamp, nome, cognome, email, firmaDataURL
       return j.rows.map(row => ({
         nome: row.nome || "",
         cognome: row.cognome || "",
@@ -169,54 +191,59 @@ function getBasePath() {
   async function getArchivio() {
     const online = await getFirmeOnline();
     if (online && online.length) return online;
+    // fallback locale
     return JSON.parse(localStorage.getItem("registroFirme") || "[]");
   }
 
   // ---- CSV ----
-  csvBtn.onclick = async () => {
-    const arr = await getArchivio();
-    const msg = document.getElementById("exportMessage");
-    if (!arr.length) { msg.textContent = "Registro vuoto"; return; }
+  if (csvBtn) {
+    csvBtn.onclick = async () => {
+      const arr = await getArchivio();
+      const msg = document.getElementById("exportMessage");
+      if (!arr.length) { if (msg) msg.textContent = "Registro vuoto"; return; }
 
-    const rows = [["nome","cognome","email","data","firmaDataURL"]];
-    arr.forEach(r => rows.push([
-      r.nome, r.cognome, r.email, r.data || "", r.firmaDataURL || ""
-    ]));
+      const rows = [["nome","cognome","email","data","firmaDataURL"]];
+      arr.forEach(r => rows.push([
+        r.nome, r.cognome, r.email, r.data || "", r.firmaDataURL || ""
+      ]));
 
-    const csv = rows.map(r => r.join(",")).join("\n");
-    const blob = new Blob([csv], {type:"text/csv"});
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = "registro_firme.csv";
-    a.click();
-    URL.revokeObjectURL(url);
-    msg.textContent = "CSV scaricato";
-  };
+      const csv = rows.map(r => r.join(",")).join("\n");
+      const blob = new Blob([csv], {type:"text/csv"});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "registro_firme.csv";
+      a.click();
+      URL.revokeObjectURL(url);
+      if (msg) msg.textContent = "CSV scaricato";
+    };
+  }
 
   // ---- PDF ----
-  pdfBtn.onclick = async () => {
-    const arr = await getArchivio();
-    const msg = document.getElementById("exportMessage");
-    if (!arr.length) { msg.textContent = "Registro vuoto"; return; }
+  if (pdfBtn) {
+    pdfBtn.onclick = async () => {
+      const arr = await getArchivio();
+      const msg = document.getElementById("exportMessage");
+      if (!arr.length) { if (msg) msg.textContent = "Registro vuoto"; return; }
 
-    const { jsPDF } = window.jspdf;
-    const doc = new jsPDF();
-    let y = 20;
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF();
+      let y = 20;
 
-    arr.forEach(r => {
-      doc.text(`Nome: ${r.nome}`, 10, y);
-      doc.text(`Cognome: ${r.cognome}`, 10, y+10);
-      doc.text(`Email: ${r.email}`, 10, y+20);
-      doc.text(`Data: ${r.data || ""}`, 10, y+30);
-      if (r.firmaDataURL) {
-        try { doc.addImage(r.firmaDataURL, "PNG", 10, y+40, 120, 40); } catch(e) {}
-      }
-      y += 90;
-      if (y > 270) { doc.addPage(); y = 20; }
-    });
+      arr.forEach(r => {
+        doc.text(`Nome: ${r.nome}`, 10, y);
+        doc.text(`Cognome: ${r.cognome}`, 10, y+10);
+        doc.text(`Email: ${r.email}`, 10, y+20);
+        doc.text(`Data: ${r.data || ""}`, 10, y+30);
+        if (r.firmaDataURL) {
+          try { doc.addImage(r.firmaDataURL, "PNG", 10, y+40, 120, 40); } catch(e) {}
+        }
+        y += 90;
+        if (y > 270) { doc.addPage(); y = 20; }
+      });
 
-    doc.save("registro_firme.pdf");
-    msg.textContent = "PDF scaricato";
-  };
+      doc.save("registro_firme.pdf");
+      if (msg) msg.textContent = "PDF scaricato";
+    };
+  }
 })();
