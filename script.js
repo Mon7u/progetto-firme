@@ -34,36 +34,30 @@ function getBasePath() {
   });
 })();
 
-// ================== FIRMA (SALVATAGGIO) - registra.html ==================
+// ================== FIRMA (mouse + touch) - registra.html ==================
 (function setupSave(){
   const form = document.getElementById("firmaForm");
-  if (!form) return; // se non c'è il form siamo in index.html
+  if (!form) return; // siamo in index.html
 
   const canvas = document.getElementById("firmaCanvas");
   const ctx = canvas.getContext("2d");
   const emailInput = document.getElementById("email");
+  const msgDiv = document.getElementById("message");
 
   // Precompila email dal QR
   const params = new URLSearchParams(window.location.search);
   const emailParam = params.get("email");
   if (emailParam) emailInput.value = emailParam;
 
-  // ===== Disegno firma: mouse + touch =====
+  // ==== disegno con Pointer Events (valido per mouse + touch) ====
   let drawing = false;
 
   function getPos(e) {
     const rect = canvas.getBoundingClientRect();
-    if (e.touches && e.touches[0]) {
-      return {
-        x: e.touches[0].clientX - rect.left,
-        y: e.touches[0].clientY - rect.top
-      };
-    } else {
-      return {
-        x: e.clientX - rect.left,
-        y: e.clientY - rect.top
-      };
-    }
+    return {
+      x: e.clientX - rect.left,
+      y: e.clientY - rect.top
+    };
   }
 
   function startDraw(e) {
@@ -94,23 +88,17 @@ function getBasePath() {
     ctx.beginPath();
   }
 
-  // Mouse
-  canvas.addEventListener("mousedown", startDraw);
-  canvas.addEventListener("mousemove", moveDraw);
-  canvas.addEventListener("mouseup", endDraw);
-  canvas.addEventListener("mouseleave", endDraw);
-
-  // Touch
-  canvas.addEventListener("touchstart", startDraw, {passive:false});
-  canvas.addEventListener("touchmove",  moveDraw,  {passive:false});
-  canvas.addEventListener("touchend",   endDraw,   {passive:false});
-  canvas.addEventListener("touchcancel",endDraw,   {passive:false});
+  canvas.addEventListener("pointerdown", startDraw);
+  canvas.addEventListener("pointermove", moveDraw);
+  canvas.addEventListener("pointerup", endDraw);
+  canvas.addEventListener("pointerleave", endDraw);
+  canvas.addEventListener("pointercancel", endDraw);
 
   // Pulsante cancella
   document.getElementById("clearCanvas").onclick = () =>
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-  // ===== Invio dati =====
+  // ==== Invio dati ====
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
 
@@ -121,10 +109,9 @@ function getBasePath() {
       firmaDataURL: canvas.toDataURL("image/png")
     };
 
-    const msgDiv = document.getElementById("message");
-    msgDiv.innerHTML = "⏳ Salvataggio...";
+    msgDiv.textContent = "⏳ Salvataggio...";
 
-    // Salva sul server PythonAnywhere
+    // Server PythonAnywhere
     let remoto = false;
     try {
       const r = await fetch(`${API_BASE_URL}/firma`, {
@@ -144,7 +131,7 @@ function getBasePath() {
     arr.push({...record, data: new Date().toLocaleString("it-IT") });
     localStorage.setItem(key, JSON.stringify(arr));
 
-    msgDiv.innerHTML = remoto
+    msgDiv.textContent = remoto
       ? "✅ Registrazione salvata (server + locale)"
       : "⚠️ Salvato solo in locale";
 
@@ -159,11 +146,20 @@ function getBasePath() {
   const pdfBtn = document.getElementById("exportPdf");
   if (!csvBtn && !pdfBtn) return;
 
+  // leggi dal server e normalizza i campi
   async function getFirmeOnline() {
     try {
       const r = await fetch(`${API_BASE_URL}/firme`);
       const j = await r.json();
-      return j.ok ? j.rows : null;
+      if (!j.ok || !Array.isArray(j.rows)) return null;
+
+      return j.rows.map(row => ({
+        nome: row.nome || "",
+        cognome: row.cognome || "",
+        email: row.email || "",
+        data: row.timestamp || "",
+        firmaDataURL: row.firmaDataURL || ""
+      }));
     } catch (err) {
       console.warn("Errore lettura backend:", err);
       return null;
@@ -172,7 +168,7 @@ function getBasePath() {
 
   async function getArchivio() {
     const online = await getFirmeOnline();
-    if (online) return online;
+    if (online && online.length) return online;
     return JSON.parse(localStorage.getItem("registroFirme") || "[]");
   }
 
