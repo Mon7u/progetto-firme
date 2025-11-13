@@ -11,24 +11,41 @@
   <div class="container">
     <h1>Registrazione Firma</h1>
 
-    <form id="firmaForm">
-      <label>Nome:</label>
-      <input type="text" id="nome" required>
+    <!-- FORM FIRMA -->
+    <form id="firmaForm" class="card">
+      <div class="field">
+        <label for="nome">Nome</label>
+        <input type="text" id="nome" required>
+      </div>
 
-      <label>Cognome:</label>
-      <input type="text" id="cognome" required>
+      <div class="field">
+        <label for="cognome">Cognome</label>
+        <input type="text" id="cognome" required>
+      </div>
 
-      <label>Email:</label>
-      <input type="email" id="email" required>
+      <div class="field">
+        <label for="email">Email</label>
+        <input type="email" id="email" required>
+      </div>
 
-      <label>Firma Digitale:</label>
-      <canvas id="firmaCanvas" width="400" height="150"></canvas>
-      <button type="button" id="clearCanvas">Cancella</button>
+      <div class="field">
+        <label>Firma digitale</label>
+        <p class="hint">Firma con il dito (telefono) o con il mouse (PC).</p>
+        <canvas id="firmaCanvas" width="400" height="150"></canvas>
+        <button type="button" id="clearCanvas" class="secondary-btn">Cancella firma</button>
+      </div>
 
-      <button type="submit">Salva nel Registro</button>
+      <button type="submit" class="primary-btn">Salva nel registro</button>
+
+      <div id="message" class="message"></div>
     </form>
 
-    <div id="message"></div>
+    <!-- SCHERMATA FINALE -->
+    <div id="successScreen" class="card success-screen" style="display:none;">
+      <h2>Firma registrata ✅</h2>
+      <p>La tua firma è stata salvata correttamente.</p>
+      <p class="hint">Ora puoi chiudere questa pagina.</p>
+    </div>
   </div>
 
   <script src="script.js"></script>

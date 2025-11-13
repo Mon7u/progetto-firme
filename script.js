@@ -18,13 +18,17 @@ function getBasePath() {
     QRCode.toCanvas(canvas, url, { width: 220, margin: 2 });
     qrContainer.appendChild(canvas);
 
-    document.getElementById("istruzioni").style.display = "block";
-    document.getElementById("linkRegistrazione").innerHTML =
-      `<a href="${url}" target="_blank">${url}</a>`;
+    const istruzioni = document.getElementById("istruzioni");
+    const linkDiv = document.getElementById("linkRegistrazione");
+    if (istruzioni) istruzioni.style.display = "block";
+    if (linkDiv) {
+      linkDiv.innerHTML = `<a href="${url}" target="_blank">${url}</a>`;
+    }
   }
 
   btn.addEventListener("click", () => {
-    const email = document.getElementById("emailInput").value.trim().toLowerCase();
+    const emailInput = document.getElementById("emailInput");
+    const email = emailInput.value.trim().toLowerCase();
     if (!email.includes("@")) {
       alert("Inserisci una email valida");
       return;
@@ -48,7 +52,7 @@ function getBasePath() {
   const msgDiv = document.getElementById("message");
   const successDiv = document.getElementById("successScreen");
 
-  // Precompila email dal QR
+  // Precompila email dal QR se presente
   const params = new URLSearchParams(window.location.search);
   const emailParam = params.get("email");
   if (emailParam) emailInput.value = emailParam;
@@ -101,7 +105,9 @@ function getBasePath() {
   // Pulsante cancella
   const clearBtn = document.getElementById("clearCanvas");
   if (clearBtn) {
-    clearBtn.onclick = () => ctx.clearRect(0, 0, canvas.width, canvas.height);
+    clearBtn.addEventListener("click", () => {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+    });
   }
 
   // ---- evita spam multiplo ----
@@ -110,7 +116,7 @@ function getBasePath() {
   // ==== Invio dati ====
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
-    if (alreadySubmitted) return; // blocca doppio click
+    if (alreadySubmitted) return; // blocca doppio invio
 
     // controlla che la firma non sia vuota (canvas bianco)
     const blank = document.createElement("canvas");
@@ -151,7 +157,10 @@ function getBasePath() {
     // Backup locale
     const key = "registroFirme";
     const arr = JSON.parse(localStorage.getItem(key) || "[]");
-    arr.push({...record, data: new Date().toLocaleString("it-IT") });
+    arr.push({
+      ...record,
+      data: new Date().toLocaleString("it-IT")
+    });
     localStorage.setItem(key, JSON.stringify(arr));
 
     // Nascondi form e messaggio, mostra schermata finale
@@ -197,7 +206,7 @@ function getBasePath() {
 
   // ---- CSV ----
   if (csvBtn) {
-    csvBtn.onclick = async () => {
+    csvBtn.addEventListener("click", async () => {
       const arr = await getArchivio();
       const msg = document.getElementById("exportMessage");
       if (!arr.length) { if (msg) msg.textContent = "Registro vuoto"; return; }
@@ -216,12 +225,12 @@ function getBasePath() {
       a.click();
       URL.revokeObjectURL(url);
       if (msg) msg.textContent = "CSV scaricato";
-    };
+    });
   }
 
   // ---- PDF ----
   if (pdfBtn) {
-    pdfBtn.onclick = async () => {
+    pdfBtn.addEventListener("click", async () => {
       const arr = await getArchivio();
       const msg = document.getElementById("exportMessage");
       if (!arr.length) { if (msg) msg.textContent = "Registro vuoto"; return; }
@@ -244,6 +253,6 @@ function getBasePath() {
 
       doc.save("registro_firme.pdf");
       if (msg) msg.textContent = "PDF scaricato";
-    };
+    });
   }
 })();
