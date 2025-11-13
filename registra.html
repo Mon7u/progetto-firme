@@ -4,16 +4,21 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Registrazione Firma</title>
-  <link rel="stylesheet" href="style.css?v=3">
+
+  <link rel="stylesheet" href="style.css?v=5">
 </head>
 
 <body>
   <div class="app-container fade-in">
 
+    <!-- FORM CARD -->
     <div class="app-card" id="firmaCard">
       <h1 class="title">Firma Digitale</h1>
 
+      <button id="themeSwitcher" class="theme-btn">🎨 Cambia Tema</button>
+
       <form id="firmaForm">
+
         <div class="field">
           <label>Nome</label>
           <input type="text" id="nome" required>
@@ -31,27 +36,30 @@
 
         <div class="field">
           <label>Firma</label>
-          <p class="subtext">Firma con il dito (telefono) o mouse (PC)</p>
-          <canvas id="firmaCanvas" width="360" height="150"></canvas>
-          <button type="button" id="clearCanvas" class="secondary-btn">Cancella firma</button>
+          <p class="subtext">Firma con dito (telefono) o mouse (PC)</p>
+
+          <canvas id="firmaCanvas" width="380" height="160"></canvas>
+
+          <button type="button" id="clearCanvas" class="secondary-btn">
+            Cancella Firma
+          </button>
         </div>
 
         <button type="submit" class="primary-btn">Conferma Firma</button>
+
         <div id="message" class="message"></div>
       </form>
     </div>
 
+    <!-- SUCCESS SCREEN -->
     <div class="success-card fade-in" id="successScreen" style="display:none;">
       <div class="success-icon">✔</div>
       <h2 class="success-title">Firma Registrata!</h2>
-      <p class="success-text">
-        La tua firma è stata salvata con successo.<br>
-        Puoi chiudere la pagina. Grazie! 🙌
-      </p>
+      <p class="success-text">La tua firma è stata salvata con successo.<br>Grazie! 🙌</p>
     </div>
 
   </div>
 
-  <script src="script.js"></script>
+  <script src="script.js?v=5"></script>
 </body>
 </html>
