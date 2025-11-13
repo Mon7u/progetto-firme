@@ -255,4 +255,20 @@ function getBasePath() {
       if (msg) msg.textContent = "PDF scaricato";
     });
   }
+  // ===== TEMA LIGHT / DARK =====
+(function setupTheme() {
+  const btn = document.getElementById("themeSwitcher");
+
+  if (!btn) return;
+
+  btn.addEventListener("click", () => {
+    document.body.classList.toggle("light-theme");
+
+    if (document.body.classList.contains("light-theme")) {
+      btn.textContent = "🌙 Modalità Scura";
+    } else {
+      btn.textContent = "☀️ Modalità Chiara";
+    }
+  });
+})();
 })();

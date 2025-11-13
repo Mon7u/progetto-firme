@@ -1,224 +1,179 @@
-/* ------- RESET ------- */
-*{margin:0;padding:0;box-sizing:border-box;}
+/* ------------------------------------------------------ */
+/*   BASE STYLE – PROFESSIONAL THEME (LIGHT & DARK)       */
+/* ------------------------------------------------------ */
 
-/* ------- COLORI DEL TEMA ------- */
-:root {
-  --accent: #3b82f6;
-  --accent2: #60a5fa;
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: "Inter", "Poppins", sans-serif;
 }
 
-/* ------- SFONDO ANIMATO ------- */
+/* ------- ROOT COLORS (DARK DEFAULT) ------- */
+:root {
+  --bg: #0f172a;
+  --card-bg: rgba(255,255,255,0.07);
+  --text: #f8fafc;
+  --input-bg: rgba(255,255,255,0.12);
+  --border: rgba(255,255,255,0.18);
+  --accent: #3b82f6;
+  --accent-hover: #60a5fa;
+  --shadow: rgba(0,0,0,0.55);
+}
+
+/* ------- LIGHT THEME VALUES ------- */
+.light-theme {
+  --bg: #f3f4f6;
+  --card-bg: #ffffff;
+  --text: #1e293b;
+  --input-bg: #f1f5f9;
+  --border: #d1d5db;
+  --accent: #2563eb;
+  --accent-hover: #1e40af;
+  --shadow: rgba(0,0,0,0.12);
+}
+
+/* ------- BODY ------- */
 body {
-  font-family: "Poppins", sans-serif;
-  background: radial-gradient(circle at top, #1e293b, #0f172a 70%);
-  min-height: 100vh;
+  background: var(--bg);
+  color: var(--text);
   display: flex;
   justify-content: center;
+  min-height: 100vh;
   padding: 20px;
-  overflow-x: hidden;
-  color: #fff;
+  transition: background 0.4s ease, color 0.3s ease;
 }
 
-/* Glow effetti */
-body::before {
-  content: "";
-  position: fixed;
-  width: 380px;
-  height: 380px;
-  background: var(--accent);
-  opacity: 0.25;
-  filter: blur(140px);
-  top: -120px;
-  left: -120px;
-  z-index: -1;
-}
-
-body::after {
-  content: "";
-  position: fixed;
-  width: 300px;
-  height: 300px;
-  background: var(--accent2);
-  opacity: 0.22;
-  filter: blur(130px);
-  bottom: -150px;
-  right: -120px;
-  z-index: -1;
-}
-
-/* ------- CONTENITORE ------- */
-.app-container {
+/* ------- CARD ------- */
+.app-card, .success-card {
   width: 100%;
-  max-width: 460px;
-  animation: fadeIn 0.8s ease forwards;
+  max-width: 440px;
+  padding: 26px;
+  border-radius: 18px;
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  box-shadow: 0 18px 40px var(--shadow);
+  backdrop-filter: blur(20px);
+  animation: fadeUp 0.5s ease forwards;
 }
 
-/* ------- CARD GLASS ------- */
-.app-card,
-.success-card {
-  background: rgba(255,255,255,0.08);
-  backdrop-filter: blur(18px);
-  border: 1px solid rgba(255,255,255,0.15);
-  border-radius: 22px;
-  padding: 28px;
-  box-shadow:
-    0 25px 50px rgba(0,0,0,0.45),
-    inset 0 0 25px rgba(255,255,255,0.07);
-  animation: slideUp 0.7s ease forwards;
-}
-
-/* ------- TITOLO ------- */
 .title {
-  text-align: center;
-  font-size: 28px;
+  font-size: 26px;
   font-weight: 700;
+  text-align: center;
   margin-bottom: 18px;
-
-  background: linear-gradient(90deg, var(--accent), var(--accent2));
-  background-clip: text;
-  color: transparent;
-
-  /* Safari iPhone */
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
 }
 
-/* ------- CAMPI ------- */
+/* ------- FORM FIELDS ------- */
 .field {
-  margin-bottom: 18px;
+  margin-bottom: 16px;
 }
 
 label {
-  display: block;
-  margin-bottom: 6px;
   font-size: 14px;
   font-weight: 600;
+  margin-bottom: 6px;
+  display: block;
 }
 
 input {
   width: 100%;
   padding: 12px;
-  border-radius: 14px;
-  border: 1px solid rgba(255,255,255,0.2);
-  background: rgba(255,255,255,0.1);
-  color: #fff;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: var(--input-bg);
+  color: var(--text);
   font-size: 15px;
   transition: 0.2s;
 }
 
 input:focus {
   border-color: var(--accent);
-  box-shadow: 0 0 0 3px rgba(96,165,250,0.3);
+  box-shadow: 0 0 0 3px rgba(37,99,235,0.3);
   outline: none;
 }
 
-/* ------- CANVAS (FIRMA) ------- */
+/* ------- CANVAS FIRMA ------- */
 canvas {
   width: 100%;
-  border-radius: 16px;
-  background: rgba(255,255,255,0.05);
-  border: 2px dashed rgba(255,255,255,0.25);
+  border-radius: 12px;
+  border: 2px dashed var(--border);
+  background: var(--input-bg);
   margin-top: 6px;
   touch-action: none;
-  transition: 0.3s;
 }
 
 canvas:active {
-  border-color: var(--accent2);
-  box-shadow: 0 0 12px var(--accent2);
+  border-color: var(--accent);
 }
 
 /* ------- BUTTONS ------- */
 .primary-btn {
   width: 100%;
-  padding: 13px;
-  border-radius: 16px;
-  margin-top: 10px;
-  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  padding: 12px;
+  border-radius: 12px;
+  background: var(--accent);
   border: none;
   color: white;
-  font-size: 16px;
   font-weight: 600;
+  font-size: 16px;
   cursor: pointer;
-  box-shadow: 0 12px 28px rgba(0,0,0,0.45);
-  transition: 0.15s;
+  transition: 0.2s;
 }
 
 .primary-btn:hover {
+  background: var(--accent-hover);
   transform: translateY(-2px);
-  box-shadow: 0 15px 32px rgba(0,0,0,0.55);
 }
 
-.secondary-btn {
-  padding: 8px 14px;
-  border-radius: 12px;
-  background: rgba(255,255,255,0.15);
-  border: none;
-  color: white;
-  cursor: pointer;
-  margin-top: 10px;
-  transition: 0.15s;
-}
-
-.secondary-btn:hover {
-  background: rgba(255,255,255,0.25);
-}
-
-/* Pulsante per cambiare tema */
-.theme-btn {
+.secondary-btn, .theme-btn {
   width: 100%;
-  padding: 10px 0;
-  margin-top: 20px;
-  background: rgba(255,255,255,0.18);
-  border-radius: 14px;
-  color: white;
-  font-size: 15px;
-  border: none;
+  padding: 10px;
+  border-radius: 10px;
+  background: var(--input-bg);
+  border: 1px solid var(--border);
+  color: var(--text);
+  margin-top: 10px;
   cursor: pointer;
+  transition: 0.2s;
 }
 
+.secondary-btn:hover,
 .theme-btn:hover {
-  background: rgba(255,255,255,0.28);
+  background: var(--accent);
+  color: white;
 }
 
 /* ------- SUCCESS SCREEN ------- */
 .success-card {
   text-align: center;
-  padding: 40px 30px;
 }
 
 .success-icon {
-  font-size: 80px;
-  color: #4ade80;
+  font-size: 70px;
+  color: #22c55e;
   margin-bottom: 10px;
-  animation: popIn 0.6s ease forwards;
+  animation: popIn 0.5s ease forwards;
 }
 
 .success-title {
-  font-size: 28px;
-  margin-top: 10px;
+  font-size: 24px;
   font-weight: 700;
 }
 
 .success-text {
-  font-size: 16px;
-  margin-top: 12px;
-  line-height: 1.5;
+  margin-top: 10px;
+  font-size: 15px;
 }
 
 /* ------- ANIMAZIONI ------- */
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
-
-@keyframes slideUp {
-  from { transform: translateY(40px); opacity: 0; }
-  to { transform: translateY(0); opacity: 1; }
+@keyframes fadeUp {
+  from {opacity:0; transform:translateY(30px);}
+  to {opacity:1; transform:translateY(0);}
 }
 
 @keyframes popIn {
-  0% { transform: scale(0.5); opacity: 0; }
-  80% { transform: scale(1.1); }
-  100% { transform: scale(1); opacity: 1; }
+  0% {opacity:0; transform:scale(0.5);}
+  80% {transform:scale(1.15);}
+  100% {opacity:1; transform:scale(1);}
 }
