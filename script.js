@@ -1,26 +1,23 @@
-// ===================================
-// CONFIGURAZIONE BACKEND
-// ===================================
-
+// =========================
+// CONFIG BACKEND
+// =========================
 const API_BASE_URL = "https://Mon7u.pythonanywhere.com/api";
 
-// ===================================
-// TEMA LIGHT/DARK (SOLO INDEX.HTML)
-// ===================================
-
+// =========================
+// TEMA LIGHT/DARK (solo index.html, toggle con pallino)
+// =========================
 (function setupThemeToggle() {
   const toggle = document.getElementById("themeToggle");
-  if (!toggle) return; // su registra.html non c'è il toggle
+  if (!toggle) return; // su registra.html non c'è
 
   toggle.addEventListener("click", () => {
     document.body.classList.toggle("light-theme");
   });
 })();
 
-// ===================================
-// GENERAZIONE QR (SOLO INDEX.HTML)
-// ===================================
-
+// =========================
+// GENERA QR (solo index.html)
+// =========================
 (function setupQR() {
   const btn = document.getElementById("generaQR");
   if (!btn) return; // non siamo in index.html
@@ -31,7 +28,7 @@ const API_BASE_URL = "https://Mon7u.pythonanywhere.com/api";
 
     // Controllo email istituzionale
     if (!email.endsWith("@ittsrimini.edu.it")) {
-      alert("L'email deve essere @ittsrimini.edu.it");
+      alert("L'email deve appartenere al dominio @ittsrimini.edu.it");
       return;
     }
 
@@ -65,14 +62,13 @@ const API_BASE_URL = "https://Mon7u.pythonanywhere.com/api";
   });
 })();
 
-// ===================================
-// FIRMA DIGITALE (SOLO REGISTRA.HTML)
-// ===================================
-
+// =========================
+// FIRMA DIGITALE (solo registra.html)
+// =========================
 (function setupFirma() {
   const form = document.getElementById("firmaForm");
   const canvas = document.getElementById("firmaCanvas");
-  if (!form || !canvas) return; // non siamo su registra.html
+  if (!form || !canvas) return; // siamo su index.html
 
   const ctx = canvas.getContext("2d");
   const msgDiv = document.getElementById("message");
@@ -87,11 +83,10 @@ const API_BASE_URL = "https://Mon7u.pythonanywhere.com/api";
     emailInput.value = emailParam.toLowerCase();
   }
 
-  // Rende l'email NON modificabile
-  emailInput.setAttribute("readonly", "readonly");
+  // Rende l'email NON modificabile anche da JS (doppia sicurezza)
+  emailInput.readOnly = true;
   emailInput.style.pointerEvents = "none";
-  // opzionale: per far capire che è bloccata
-  emailInput.style.backgroundColor = "#d1d5db";
+  emailInput.style.userSelect = "none";
 
   // Disegno firma (pointer events: mouse + touch)
   let drawing = false;
@@ -100,7 +95,7 @@ const API_BASE_URL = "https://Mon7u.pythonanywhere.com/api";
     const rect = canvas.getBoundingClientRect();
     return {
       x: e.clientX - rect.left,
-      y: e.clientY - rect.top,
+      y: e.clientY - rect.top
     };
   }
 
@@ -155,7 +150,6 @@ const API_BASE_URL = "https://Mon7u.pythonanywhere.com/api";
     const blank = document.createElement("canvas");
     blank.width = canvas.width;
     blank.height = canvas.height;
-
     if (canvas.toDataURL() === blank.toDataURL()) {
       msgDiv.textContent = "Metti la firma prima di confermare.";
       return;
@@ -168,7 +162,7 @@ const API_BASE_URL = "https://Mon7u.pythonanywhere.com/api";
       nome: document.getElementById("nome").value.trim(),
       cognome: document.getElementById("cognome").value.trim(),
       email: emailVal,
-      firmaDataURL: canvas.toDataURL("image/png"),
+      firmaDataURL: canvas.toDataURL("image/png")
     };
 
     // Salvataggio su PythonAnywhere
@@ -176,18 +170,18 @@ const API_BASE_URL = "https://Mon7u.pythonanywhere.com/api";
       await fetch(`${API_BASE_URL}/firma`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(record),
+        body: JSON.stringify(record)
       });
     } catch (err) {
       console.warn("Errore backend:", err);
     }
 
-    // Backup locale (solo nel dispositivo usato)
+    // Backup locale (solo sul dispositivo)
     const key = "registroFirme";
     const arr = JSON.parse(localStorage.getItem(key) || "[]");
     arr.push({
       ...record,
-      data: new Date().toLocaleString("it-IT"),
+      data: new Date().toLocaleString("it-IT")
     });
     localStorage.setItem(key, JSON.stringify(arr));
 
@@ -197,10 +191,9 @@ const API_BASE_URL = "https://Mon7u.pythonanywhere.com/api";
   });
 })();
 
-// ===================================
-// EXPORT CSV + PDF (SOLO INDEX.HTML)
-// ===================================
-
+// =========================
+// EXPORT CSV + PDF (solo index.html)
+// =========================
 (function setupExport() {
   const csvBtn = document.getElementById("exportCsv");
   const pdfBtn = document.getElementById("exportPdf");
@@ -218,7 +211,7 @@ const API_BASE_URL = "https://Mon7u.pythonanywhere.com/api";
         cognome: r.cognome || "",
         email: r.email || "",
         data: r.timestamp || "",
-        firmaDataURL: r.firmaDataURL || "",
+        firmaDataURL: r.firmaDataURL || ""
       }));
     } catch (err) {
       console.warn("Errore lettura backend:", err);
@@ -229,7 +222,6 @@ const API_BASE_URL = "https://Mon7u.pythonanywhere.com/api";
   async function getArchivio() {
     const online = await getFirmeFromBackend();
     if (online.length) return online;
-
     return JSON.parse(localStorage.getItem("registroFirme") || "[]");
   }
 
