@@ -15,10 +15,11 @@
 <body>
   <div class="page">
     <div class="app-card">
+      
       <div class="header-row">
         <h1 class="title">Registro Firma</h1>
 
-        <!-- TOGGLE TEMA SOLO QUI -->
+        <!-- TOGGLE TEMA -->
         <div class="theme-toggle">
           <span class="theme-label">Tema</span>
           <button id="themeToggle" class="toggle">
@@ -32,28 +33,34 @@
       <p class="subtitle">Pannello docente</p>
 
       <div class="field">
-        <label for="emailInput">Email docente</label>
-        <input
-          type="email"
-          id="emailInput"
-          placeholder="nome.cognome@scuola.it"
-        />
+        <label for="emailInput">Email studente</label>
+        <input type="email" id="emailInput" placeholder="nome.cognome@ittsrimini.edu.it" />
       </div>
 
       <button id="generaQR" class="primary-btn">Genera QR</button>
 
+      <!-- NUOVO: SCARICA PNG -->
+      <button id="downloadQR" class="secondary-btn" style="display:none;">
+        Scarica QR in PNG
+      </button>
+
       <div id="qrContainer" class="qr-wrapper"></div>
-      <p id="istruzioni" class="help-text" style="display: none;">
+
+      <p id="istruzioni" class="help-text" style="display:none;">
         Scansiona il QR dal telefono dello studente.
       </p>
+
       <div id="linkRegistrazione" class="link-wrapper"></div>
 
       <hr class="divider" />
 
       <h2 class="subtitle">Esporta registro</h2>
+
       <button id="exportCsv" class="primary-btn">Scarica CSV</button>
       <button id="exportPdf" class="secondary-btn">Scarica PDF</button>
+
       <div id="exportMessage" class="message"></div>
+
     </div>
   </div>
 

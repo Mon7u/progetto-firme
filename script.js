@@ -16,10 +16,11 @@ const API_BASE_URL = "https://Mon7u.pythonanywhere.com/api";
 })();
 
 // =========================
-// GENERA QR (solo index.html)
+// GENERA QR (solo index.html) + DOWNLOAD PNG
 // =========================
 (function setupQR() {
   const btn = document.getElementById("generaQR");
+  const downloadBtn = document.getElementById("downloadQR");
   if (!btn) return; // non siamo in index.html
 
   btn.addEventListener("click", () => {
@@ -59,6 +60,17 @@ const API_BASE_URL = "https://Mon7u.pythonanywhere.com/api";
     document.getElementById("istruzioni").style.display = "block";
     document.getElementById("linkRegistrazione").innerHTML =
       `<a href="${url.toString()}" target="_blank">${url.toString()}</a>`;
+
+    // === NUOVO: attiva pulsante per scaricare il QR in PNG ===
+    if (downloadBtn) {
+      downloadBtn.style.display = "block";
+      downloadBtn.onclick = () => {
+        const link = document.createElement("a");
+        link.download = "qr_ittsrimini.png";
+        link.href = canvas.toDataURL("image/png");
+        link.click();
+      };
+    }
   });
 })();
 
