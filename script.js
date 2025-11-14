@@ -1,69 +1,86 @@
-// ===== CONFIG =====
+// =========================
+// CONFIGURAZIONE BACKEND
+// =========================
+
 const API_BASE_URL = "https://Mon7u.pythonanywhere.com/api";
 
-// ===== TEMA LIGHT/DARK (solo se c'è il toggle, quindi solo index) =====
+// =========================
+//  TEMA LIGHT/DARK (solo index.html)
+// =========================
+
 (function setupThemeToggle() {
   const toggle = document.getElementById("themeToggle");
-  if (!toggle) return; // in registra.html non c'è, quindi non fa niente
+  if (!toggle) return; // siamo SU REGISTRA.HTML, non fare nulla
 
   toggle.addEventListener("click", () => {
     document.body.classList.toggle("light-theme");
   });
 })();
 
-// ===== GENERA QR (index.html) =====
+// =========================
+// GENERA QR (solo index.html)
+// =========================
+
 (function setupQR() {
   const btn = document.getElementById("generaQR");
-  if (!btn) return; // non siamo in index
+  if (!btn) return; // siamo su registra.html
 
   btn.addEventListener("click", () => {
     const emailInput = document.getElementById("emailInput");
     const email = emailInput.value.trim().toLowerCase();
 
-    if (!email || !email.includes("@")) {
-      alert("Inserisci una email valida");
+    // 🔐 Controllo email istituzionale
+    if (!email.endsWith("@ittsrimini.edu.it")) {
+      alert("Devi usare una email @ittsrimini.edu.it");
       return;
     }
 
-    // URL relativo: stessa cartella di index.html (funziona ovunque)
+    // URL relativo → funziona su GitHub Pages
     const url = new URL("registra.html", window.location.href);
     url.searchParams.set("email", email);
 
     const qrContainer = document.getElementById("qrContainer");
     qrContainer.innerHTML = "";
 
-    QRCode.toCanvas(url.toString(), { width: 220, margin: 2 }, (err, canvas) => {
-      if (err) {
-        alert("Errore nella generazione del QR");
-        return;
+    QRCode.toCanvas(
+      url.toString(),
+      { width: 220, margin: 2 },
+      (err, canvas) => {
+        if (err) {
+          alert("Errore generazione QR");
+          return;
+        }
+        qrContainer.appendChild(canvas);
       }
-      qrContainer.appendChild(canvas);
-    });
+    );
 
     document.getElementById("istruzioni").style.display = "block";
     document.getElementById("linkRegistrazione").innerHTML =
-      `<a href="${url.toString()}" target="_blank">${url.toString()}</a>`;
+      `<a href="${url}" target="_blank">${url}</a>`;
   });
 })();
 
-// ===== FIRMA (registra.html) =====
+// =========================
+//  FIRMA DIGITALE (solo registra.html)
+// =========================
+
 (function setupFirma() {
   const form = document.getElementById("firmaForm");
   const canvas = document.getElementById("firmaCanvas");
-  if (!form || !canvas) return; // non siamo in registra
+  if (!form || !canvas) return; // non siamo su registra
 
   const ctx = canvas.getContext("2d");
-  const emailInput = document.getElementById("email");
   const msgDiv = document.getElementById("message");
   const successCard = document.getElementById("successScreen");
   const firmaCard = document.getElementById("firmaCard");
+  const emailInput = document.getElementById("email");
 
   // Precompila email dal QR
   const params = new URLSearchParams(window.location.search);
   const emailParam = params.get("email");
   if (emailParam) emailInput.value = emailParam;
 
-  // Disegno con pointer events (mouse + touch)
+  // Disegno firma
   let drawing = false;
 
   function getPos(e) {
@@ -99,9 +116,10 @@ const API_BASE_URL = "https://Mon7u.pythonanywhere.com/api";
     drawing = false;
   });
 
-  document.getElementById("clearCanvas").addEventListener("click", () =>
-    ctx.clearRect(0, 0, canvas.width, canvas.height)
-  );
+  // Cancella firma
+  document.getElementById("clearCanvas").addEventListener("click", () => {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+  });
 
   let alreadySubmitted = false;
 
@@ -109,12 +127,19 @@ const API_BASE_URL = "https://Mon7u.pythonanywhere.com/api";
     e.preventDefault();
     if (alreadySubmitted) return;
 
-    // Controlla firma non vuota
+    // 🔐 Controllo email istituzionale
+    const emailVal = emailInput.value.trim().toLowerCase();
+    if (!emailVal.endsWith("@ittsrimini.edu.it")) {
+      msgDiv.textContent = "Usa una email @ittsrimini.edu.it";
+      return;
+    }
+
+    // Controllo firma non vuota
     const blank = document.createElement("canvas");
     blank.width = canvas.width;
     blank.height = canvas.height;
     if (canvas.toDataURL() === blank.toDataURL()) {
-      msgDiv.textContent = "Metti la firma prima di confermare.";
+      msgDiv.textContent = "Devi firmare prima di confermare.";
       return;
     }
 
@@ -124,19 +149,17 @@ const API_BASE_URL = "https://Mon7u.pythonanywhere.com/api";
     const record = {
       nome: document.getElementById("nome").value.trim(),
       cognome: document.getElementById("cognome").value.trim(),
-      email: emailInput.value.trim().toLowerCase(),
+      email: emailVal,
       firmaDataURL: canvas.toDataURL("image/png"),
     };
 
-    // Salva su PythonAnywhere
+    // Salva sul backend
     try {
-      const res = await fetch(`${API_BASE_URL}/firma`, {
+      await fetch(`${API_BASE_URL}/firma`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(record),
       });
-      const j = await res.json();
-      // se vuoi puoi controllare j.ok
     } catch (err) {
       console.warn("Errore backend:", err);
     }
@@ -156,10 +179,15 @@ const API_BASE_URL = "https://Mon7u.pythonanywhere.com/api";
   });
 })();
 
-// ===== EXPORT (index.html) =====
+// =========================
+// EXPORT CSV + PDF (solo index.html)
+// =========================
+
 (function setupExport() {
   const csvBtn = document.getElementById("exportCsv");
   const pdfBtn = document.getElementById("exportPdf");
+  const msg = document.getElementById("exportMessage");
+
   if (!csvBtn && !pdfBtn) return; // non siamo in index
 
   async function getFirmeFromBackend() {
@@ -175,7 +203,7 @@ const API_BASE_URL = "https://Mon7u.pythonanywhere.com/api";
         firmaDataURL: r.firmaDataURL || "",
       }));
     } catch (err) {
-      console.warn("Errore lettura backend:", err);
+      console.warn("Errore backend:", err);
       return [];
     }
   }
@@ -183,69 +211,69 @@ const API_BASE_URL = "https://Mon7u.pythonanywhere.com/api";
   async function getArchivio() {
     const online = await getFirmeFromBackend();
     if (online.length) return online;
+
     return JSON.parse(localStorage.getItem("registroFirme") || "[]");
   }
 
-  const msg = document.getElementById("exportMessage");
+  // ===== CSV =====
+  csvBtn?.addEventListener("click", async () => {
+    const arr = await getArchivio();
+    if (!arr.length) {
+      msg.textContent = "Registro vuoto.";
+      return;
+    }
 
-  // CSV
-  if (csvBtn) {
-    csvBtn.addEventListener("click", async () => {
-      const arr = await getArchivio();
-      if (!arr.length) {
-        if (msg) msg.textContent = "Registro vuoto.";
-        return;
+    const rows = [["nome", "cognome", "email", "data", "firmaDataURL"]];
+    arr.forEach((r) =>
+      rows.push([r.nome, r.cognome, r.email, r.data || "", r.firmaDataURL])
+    );
+
+    const csv = rows.map((r) => r.join(",")).join("\n");
+    const blob = new Blob([csv], { type: "text/csv" });
+    const url = URL.createObjectURL(blob);
+
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "registro_firme.csv";
+    a.click();
+    URL.revokeObjectURL(url);
+
+    msg.textContent = "CSV scaricato.";
+  });
+
+  // ===== PDF =====
+  pdfBtn?.addEventListener("click", async () => {
+    const arr = await getArchivio();
+    if (!arr.length) {
+      msg.textContent = "Registro vuoto.";
+      return;
+    }
+
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+    let y = 20;
+
+    arr.forEach((r, i) => {
+      doc.text(`Nome: ${r.nome}`, 10, y);
+      doc.text(`Cognome: ${r.cognome}`, 10, y + 8);
+      doc.text(`Email: ${r.email}`, 10, y + 16);
+      doc.text(`Data: ${r.data || ""}`, 10, y + 24);
+
+      if (r.firmaDataURL) {
+        try {
+          doc.addImage(r.firmaDataURL, "PNG", 10, y + 30, 80, 30);
+        } catch (e) {}
       }
 
-      const rows = [["nome", "cognome", "email", "data", "firmaDataURL"]];
-      arr.forEach((r) =>
-        rows.push([r.nome, r.cognome, r.email, r.data || "", r.firmaDataURL])
-      );
+      y += 70;
 
-      const csv = rows.map((r) => r.join(",")).join("\n");
-      const blob = new Blob([csv], { type: "text/csv" });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = "registro_firme.csv";
-      a.click();
-      URL.revokeObjectURL(url);
-      if (msg) msg.textContent = "CSV scaricato.";
-    });
-  }
-
-  // PDF
-  if (pdfBtn) {
-    pdfBtn.addEventListener("click", async () => {
-      const arr = await getArchivio();
-      if (!arr.length) {
-        if (msg) msg.textContent = "Registro vuoto.";
-        return;
+      if (y > 260 && i < arr.length - 1) {
+        doc.addPage();
+        y = 20;
       }
-
-      const { jsPDF } = window.jspdf;
-      const doc = new jsPDF();
-      let y = 20;
-
-      arr.forEach((r, i) => {
-        doc.text(`Nome: ${r.nome}`, 10, y);
-        doc.text(`Cognome: ${r.cognome}`, 10, y + 8);
-        doc.text(`Email: ${r.email}`, 10, y + 16);
-        doc.text(`Data: ${r.data || ""}`, 10, y + 24);
-        if (r.firmaDataURL) {
-          try {
-            doc.addImage(r.firmaDataURL, "PNG", 10, y + 30, 80, 30);
-          } catch (e) {}
-        }
-        y += 70;
-        if (y > 260 && i < arr.length - 1) {
-          doc.addPage();
-          y = 20;
-        }
-      });
-
-      doc.save("registro_firme.pdf");
-      if (msg) msg.textContent = "PDF scaricato.";
     });
-  }
+
+    doc.save("registro_firme.pdf");
+    msg.textContent = "PDF scaricato.";
+  });
 })();
